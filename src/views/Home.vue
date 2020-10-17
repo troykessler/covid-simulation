@@ -11,8 +11,8 @@ export default defineComponent({
   setup() {
     const canvas = ref<any>(null);
 
-    const width = ref<number | null>(null);
-    const height = ref<number | null>(null);
+    const width = ref<number>(500);
+    const height = ref<number>(500);
 
     const tick = ref<number>(0);
     const particles = ref<any[]>([])
@@ -22,7 +22,7 @@ export default defineComponent({
       defaultSpeed: 1,
       addedSpeed: 2,
 
-      defaultRadius: 1,
+      defaultRadius: 2,
 
       communicationRadius: Math.pow(20, 2),
 
@@ -62,8 +62,8 @@ export default defineComponent({
       age = 0;
       recovery = options.value.r0 + Math.random() * 100
 
-      x: number = Math.random() * width.value!;
-      y: number = Math.random() * height.value!;
+      x: number = Math.random() * width.value;
+      y: number = Math.random() * height.value;
 
       speed: number = options.value.defaultSpeed + Math.random() * options.value.addedSpeed;
       directionAngle: number = Math.floor(Math.random() * 360);
@@ -88,15 +88,15 @@ export default defineComponent({
       }
 
       border() {
-        if (this.x >= width.value! || this.x <= 0) {
+        if (this.x >= width.value || this.x <= 0) {
           this.directions.x *= -1;
         }
-        if (this.y >= height.value! || this.y <= 0) {
+        if (this.y >= height.value || this.y <= 0) {
           this.directions.y *= -1;
         }
 
-        this.x > width.value! ? this.x = width.value! : this.x;
-        this.y > height.value! ? this.y = height.value! : this.y;
+        this.x > width.value ? this.x = width.value : this.x;
+        this.y > height.value ? this.y = height.value : this.y;
 
         this.x < 0 ? this.x = 0 : this.x;
         this.y < 0 ? this.y = 0 : this.y;
@@ -154,13 +154,8 @@ export default defineComponent({
       const canvasBody: any = document.getElementById("simulation-window");
       canvas.value = canvasBody.getContext("2d");
 
-      width.value = canvasBody.width = window.innerWidth;
-      height.value = canvasBody.height = window.innerHeight;
-
-      window.addEventListener("resize", () => {
-        width.value = canvasBody.width = window.innerWidth;
-        height.value = canvasBody.height = window.innerHeight;
-      });
+      canvasBody.width = width.value;
+      canvasBody.height = height.value;
 
       setup();
     });
@@ -169,3 +164,12 @@ export default defineComponent({
   },
 });
 </script>
+
+<style>
+#simulation-window {
+  width: 500px !important;
+  height: 500px !important;
+  border: 2px solid white;
+  margin-top: 100px;
+}
+</style>
