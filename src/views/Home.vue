@@ -1,14 +1,5 @@
 <template>
-  <div class="grid grid-cols-3 m-6 text-white">
-    <div>
-      <div class="text-center">Variablen</div>
-      <div>
-        <div class="mt-8">Größe</div>
-        <vue-slider class="mt-1 mr-6" :min="1" :max="15" :interval="1" v-model="options.size"></vue-slider>
-        <div class="mt-8">Infektionsradius</div>
-        <vue-slider class="mt-1 mr-6" :min="1" :max="50" :interval="1" v-model="options.infectionRadius"></vue-slider>
-      </div>
-    </div>
+  <div class="grid grid-cols-2 m-6 text-white">
     <div>
       <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ removed }}</div>
       <div id="simulation-window" class="mt-6 mx-auto block"></div>
@@ -16,6 +7,13 @@
     <div>
       <div class="text-center">Graphischer Verlauf</div>
       <div id="chart" class="mt-6 mx-auto block" />
+      <div class="text-center">Variablen</div>
+      <div class="m-auto" style="width: 500px">
+        <div class="mt-8">Größe</div>
+        <vue-slider class="mt-1 mr-6" :min="1" :max="15" :interval="1" v-model="options.size"></vue-slider>
+        <div class="mt-8">Infektionsradius</div>
+        <vue-slider class="mt-1 mr-6" :min="1" :max="50" :interval="1" v-model="options.infectionRadius"></vue-slider>
+      </div>
     </div>
   </div>
 </template>
