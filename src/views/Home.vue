@@ -96,8 +96,8 @@ export default defineComponent({
       size: 4,
       i0: 2,
       infectionRadius: 5,
-      infectionRate: 0.02,
-      recovery: 400
+      infectionRate: 0.025,
+      recovery: 350
     })
 
     const chart = ref<any>(null)
@@ -218,7 +218,7 @@ export default defineComponent({
         p5.background(33, 33, 33);
         virus();
 
-        if (counter.value % 40 === 0) {
+        if (counter.value % 60 === 0) {
           updateChart();
         }
 
