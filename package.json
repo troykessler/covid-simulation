@@ -8,10 +8,13 @@
   },
   "dependencies": {
     "apexcharts": "^3.22.0",
+    "autoprefixer": "^9.0.0",
     "p5": "^1.1.9",
+    "tailwindcss": "^1.9.4",
     "vue": "^3.0.0",
     "vue-apexcharts": "^1.6.0",
-    "vue-router": "^4.0.0-0"
+    "vue-router": "^4.0.0-0",
+    "vue-slider-component": "^4.0.0-beta.2"
   },
   "devDependencies": {
     "@types/p5": "^0.9.1",

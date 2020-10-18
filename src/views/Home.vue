@@ -1,17 +1,30 @@
 <template>
-  <div>
-    <div id="title">S = {{ susceptibles }}, I = {{ infected }}, R = {{ removed }}</div>
-    <div id="simulation-window"></div>
+  <div class="grid grid-cols-3 m-6 text-white">
     <div>
-      <div id="chart" />
+      <div class="text-center">Variablen</div>
+      <div>
+        <div class="mt-8">Größe</div>
+        <vue-slider class="mt-1 mr-6" :min="1" :max="15" :interval="1" v-model="options.size"></vue-slider>
+        <div class="mt-8">Infektionsradius</div>
+        <vue-slider class="mt-1 mr-6" :min="1" :max="50" :interval="1" v-model="options.infectionRadius"></vue-slider>
+      </div>
+    </div>
+    <div>
+      <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ removed }}</div>
+      <div id="simulation-window" class="mt-6 mx-auto block"></div>
+    </div>
+    <div>
+      <div class="text-center">Graphischer Verlauf</div>
+      <div id="chart" class="mt-6 mx-auto block" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref } from "vue";
+import { defineComponent, onMounted, ref, watch } from "vue";
 import P5 from 'p5';
-import ApexCharts from 'apexcharts'
+import ApexCharts from 'apexcharts';
+import VueSlider from 'vue-slider-component';
 
 enum STATUS {
   S = 'S',
@@ -87,6 +100,9 @@ class Particle {
 }
 
 export default defineComponent({
+  components: {
+    VueSlider
+  },
   setup() {
     const options = ref<IOptions>({
       width: 500,
@@ -118,6 +134,10 @@ export default defineComponent({
       dataLabels: {
         enabled: false
       },
+      grid: {
+        borderColor: '#a9b3b8',
+        strokeDashArray: 1
+      },
       stroke: {
         curve: 'straight',
         width: 2
@@ -131,15 +151,15 @@ export default defineComponent({
       series: [
         {
           name: 'Susceptibles',
-          data: [susceptibles.value]
+          data: []
         },
         {
           name: 'Infected',
-          data: [infected.value]
+          data: []
         },
         {
           name: 'Removed',
-          data: [removed.value]
+          data: []
         }
       ]
     })
@@ -147,15 +167,15 @@ export default defineComponent({
     const chartSeries: any = [
       {
         name: 'Susceptibles',
-        data: [susceptibles.value]
+        data: []
       },
       {
         name: 'Infected',
-        data: [infected.value]
+        data: []
       },
       {
         name: 'Removed',
-        data: [removed.value]
+        data: []
       }
     ]
     
@@ -168,7 +188,7 @@ export default defineComponent({
     const sketch = (p5: any) => {
       let particles: Particle[] = [];
 
-      function virus() {
+      function loop() {
         const radius = options.value.infectionRadius;
         const infectionRate = options.value.infectionRate;
 
@@ -218,8 +238,7 @@ export default defineComponent({
 
       p5.draw = () => {
         p5.background(33, 33, 33);
-        virus();
-
+        loop();
 
         if (counter.value % 10) {
           updateChart()
@@ -243,25 +262,20 @@ export default defineComponent({
     return {
       susceptibles,
       infected,
-      removed
+      removed,
+      options
     }
   }
 });
 </script>
 
 <style>
-#title {
-  margin: 20px auto 10px auto;
-  color: white;
-}
 #simulation-window {
-  width: 500px !important;
-  height: 500px !important;
-  border: 2px solid white;
-  margin: 0 auto;
+  width: 500px;
+  height: 500px;
+  outline: 2px solid white;
 }
 #chart {
   width: 500px;
-  margin: 20px auto;
 }
 </style>
