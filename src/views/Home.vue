@@ -28,6 +28,7 @@ interface IOptions {
   size: number;
   i0: number;
   infectionRadius: number;
+  infectionRate: number;
 }
 
 class Particle {
@@ -39,16 +40,13 @@ class Particle {
   d: { x: number, y: number };
 
   status: STATUS = STATUS.S;
-  width: number;
-  height: number;
+  duration: number = 0;
 
   constructor(status: STATUS, width: number, height: number, speed: number) {
     this.status = status;
-    this.width = width;
-    this.height = height;
 
-    this.x = Math.random() * this.width;
-    this.y = Math.random() * this.height;
+    this.x = Math.random() * width;
+    this.y = Math.random() * height;
     this.speed = speed + Math.random() * 2 * speed
     this.directions = Math.floor(Math.random() * 360)
     
@@ -58,19 +56,27 @@ class Particle {
     }
   }
 
-  move() {
-    if (this.x >= this.width || this.x <= 0) {
+  move(width: number, height: number) {
+    if (this.x >= width || this.x <= 0) {
       this.d.x *= -1;
     }
-    if (this.y >= this.height || this.y <= 0) {
+    if (this.y >= height || this.y <= 0) {
       this.d.y *= -1;
     }
-    this.x > this.width ? this.x = this.width : this.x;
-    this.y > this.height ? this.y = this.height : this.y;
+    this.x > width ? this.x = width : this.x;
+    this.y > height ? this.y = height : this.y;
     this.x < 0 ? this.x = 0 : this.x;
     this.y < 0 ? this.y = 0 : this.y;
     this.x += this.d.x;
     this.y += this.d.y;
+
+    if (this.status === STATUS.I) {
+      this.duration++;
+
+      if (this.duration > 500) {
+        this.status = STATUS.R;
+      }
+    }
   }
 
   intersects(particle: Particle, radius: number) {
@@ -87,7 +93,8 @@ export default defineComponent({
       speed: 0.5,
       size: 4,
       i0: 3,
-      infectionRadius: 10
+      infectionRadius: 5,
+      infectionRate: 0.015
     })
 
     const sketch = (p5: any) => {
@@ -95,16 +102,26 @@ export default defineComponent({
 
       function virus() {
         const radius = options.value.infectionRadius;
+        const infectionRate = options.value.infectionRate;
 
         for (let i = 0; i < particles.length; i++) {
-          particles[i].move();
+          particles[i].move(options.value.width, options.value.height);
           p5.fill(STATUS_COLOR[particles[i].status]);
           p5.ellipse(particles[i].x, particles[i].y, options.value.size, options.value.size);
         }
         for (let i = 0; i < particles.length; i++) {
           for (let j = 0; j < particles.length; j++) {
-            if (j != i && particles[i].intersects(particles[j], radius) && particles[j].status === STATUS.I) {
-              particles[i].status = STATUS.I;
+            if (i !== j) {
+              let particleI: Particle = particles[i];
+              let particleJ: Particle = particles[j];
+
+              if (particleI.status === STATUS.I && particleJ.status === STATUS.S) {
+                if (particleI.intersects(particleJ, radius)) {
+                  if (Math.random() < infectionRate) {
+                    particleJ.status = STATUS.I;
+                  }
+                }
+              }
             }
           }
         }
