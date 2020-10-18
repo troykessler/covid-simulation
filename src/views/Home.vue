@@ -13,11 +13,13 @@ enum STATUS {
   I = 'I',
   R = 'R'
 }
+
 enum STATUS_COLOR {
   S = '#256dd9',
   I = '#c93030',
   R = 'white'
 }
+
 interface IOptions {
   width: number;
   height: number;
@@ -37,44 +39,42 @@ class Particle {
   d: { x: number, y: number };
 
   status: STATUS = STATUS.S;
+  width: number;
+  height: number;
 
-  constructor(status: STATUS) {
-    this.x = Math.random() * 500;
-    this.y = Math.random() * 500;
-    this.speed = 1 + Math.random() * 2 * 1
+  constructor(status: STATUS, width: number, height: number, speed: number) {
+    this.status = status;
+    this.width = width;
+    this.height = height;
+
+    this.x = Math.random() * this.width;
+    this.y = Math.random() * this.height;
+    this.speed = speed + Math.random() * 2 * speed
     this.directions = Math.floor(Math.random() * 360)
     
     this.d = {
       x: Math.cos(this.directions) * this.speed,
       y: Math.sin(this.directions) * this.speed
     }
-
-    this.status = status;
   }
+
   move() {
-    if (this.x >= 500 || this.x <= 0) {
+    if (this.x >= this.width || this.x <= 0) {
       this.d.x *= -1;
     }
-    if (this.y >= 500 || this.y <= 0) {
+    if (this.y >= this.height || this.y <= 0) {
       this.d.y *= -1;
     }
-    this.x > 500 ? this.x = 500 : this.x;
-    this.y > 500 ? this.y = 500 : this.y;
+    this.x > this.width ? this.x = this.width : this.x;
+    this.y > this.height ? this.y = this.height : this.y;
     this.x < 0 ? this.x = 0 : this.x;
     this.y < 0 ? this.y = 0 : this.y;
     this.x += this.d.x;
     this.y += this.d.y;
   }
-  infected() {
-    //set if loop then make bool false for reset
-    this.status = STATUS.I;
-  }
-  intersects(other: any) {
-    var d = Math.sqrt(Math.pow(other.x - this.x, 2) + Math.pow(other.y - this.y, 2));
-    return d < 5;
-  }
-  cured() {
-    this.status = STATUS.R;
+
+  intersects(particle: Particle, radius: number) {
+    return Math.sqrt(Math.pow(particle.x - this.x, 2) + Math.pow(particle.y - this.y, 2)) < radius;
   }
 }
 
@@ -83,34 +83,28 @@ export default defineComponent({
     const options = ref<IOptions>({
       width: 500,
       height: 500,
-      amountParticles: 200,
-      speed: 1,
+      amountParticles: 1000,
+      speed: 0.5,
       size: 4,
       i0: 3,
       infectionRadius: 10
     })
 
     const sketch = (p5: any) => {
-
-      let person: any;
-      //array
-      let people: Particle[] = [];
-
-      let create: any = true;
-
-      let corona: any;
+      let particles: Particle[] = [];
 
       function virus() {
-        people[0].infected();
-        for (let i = 0; i < people.length; i++) {
-          people[i].move();
-          p5.fill(STATUS_COLOR[people[i].status]);
-          p5.ellipse(people[i].x, people[i].y, options.value.size, options.value.size);
+        const radius = options.value.infectionRadius;
+
+        for (let i = 0; i < particles.length; i++) {
+          particles[i].move();
+          p5.fill(STATUS_COLOR[particles[i].status]);
+          p5.ellipse(particles[i].x, particles[i].y, options.value.size, options.value.size);
         }
-        for (let i = 0; i < people.length; i++) {
-          for (let j = 0; j < people.length; j++) {
-            if (j != i && people[i].intersects(people[j]) && people[j].status === STATUS.I) {
-              people[i].infected();
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = 0; j < particles.length; j++) {
+            if (j != i && particles[i].intersects(particles[j], radius) && particles[j].status === STATUS.I) {
+              particles[i].status = STATUS.I;
             }
           }
         }
@@ -119,8 +113,12 @@ export default defineComponent({
       p5.setup = () => {
         p5.createCanvas(500, 500);
 
-        for (let i = 0; i < 1000; i++) {
-          people.push(new Particle(STATUS.S));
+        for (let i = 0; i < options.value.amountParticles - options.value.i0; i++) {
+          particles.push(new Particle(STATUS.S, options.value.width, options.value.height, options.value.speed));
+        }
+
+        for (let i = 0; i < options.value.i0; i++) {
+          particles.push(new Particle(STATUS.I, options.value.width, options.value.height, options.value.speed));
         }
       };
 
