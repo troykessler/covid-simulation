@@ -91,11 +91,11 @@ export default defineComponent({
     const options = ref<IOptions>({
       width: 500,
       height: 500,
-      amountParticles: 1000,
+      amountParticles: 500,
       speed: 0.5,
       size: 4,
       i0: 2,
-      infectionRadius: 5,
+      infectionRadius: 7,
       infectionRate: 0.025,
       recovery: 350
     })
@@ -123,18 +123,23 @@ export default defineComponent({
         width: 2
       },
       colors: ['#256dd9', '#c93030', '#ffffff'],
+      xaxis: {
+        labels: {
+          show: false
+        }
+      },
       series: [
         {
           name: 'Susceptibles',
-          data: []
+          data: [susceptibles.value]
         },
         {
           name: 'Infected',
-          data: []
+          data: [infected.value]
         },
         {
           name: 'Removed',
-          data: []
+          data: [removed.value]
         }
       ]
     })
@@ -158,9 +163,6 @@ export default defineComponent({
       chartSeries[0].data = [...chartSeries[0].data, susceptibles.value]
       chartSeries[1].data = [...chartSeries[1].data, infected.value]
       chartSeries[2].data = [...chartSeries[2].data, removed.value]
-
-      chart.value.updateSeries(chartSeries)
-      counter.value++;
     }
 
     const sketch = (p5: any) => {
@@ -218,8 +220,13 @@ export default defineComponent({
         p5.background(33, 33, 33);
         virus();
 
+
+        if (counter.value % 10) {
+          updateChart()
+        }
+
         if (counter.value % 60 === 0) {
-          updateChart();
+          chart.value.updateSeries(chartSeries)
         }
 
         counter.value++;
@@ -244,7 +251,7 @@ export default defineComponent({
 
 <style>
 #title {
-  margin: 50px auto 10px auto;
+  margin: 20px auto 10px auto;
   color: white;
 }
 #simulation-window {
