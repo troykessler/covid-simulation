@@ -1,126 +1,113 @@
 import { defineComponent, onMounted, ref } from "vue";
+import P5 from 'p5';
+enum STATUS {
+  S = 'S',
+  I = 'I',
+  R = 'R'
+}
+enum STATUS_COLOR {
+  S = '#256dd9',
+  I = '#c93030',
+  R = 'white'
+}
+interface IOptions {
+  width: number;
+  height: number;
+  amountParticles: number;
+  speed: number;
+  size: number;
+  i0: number;
+  infectionRadius: number;
+}
+class Particle {
+  x: number = 0;
+  y: number = 0;
+  speed: number = 0;
+  directions: number = 0;
+  d: { x: number, y: number } = { x: 0, y: 0 };
+  status: STATUS = STATUS.S;
+  constructor(status: STATUS, options: IOptions) {
+    this.status = status;
+    this.x = Math.random() * options.width;
+    this.y = Math.random() * options.height;
+    this.speed = options.speed + Math.random() * 2 * options.speed
+    this.directions = Math.floor(Math.random() * 360)
+    
+    this.d = {
+      x: Math.cos(this.directions) * this.speed,
+      y: Math.sin(this.directions) * this.speed
+    }
+  }
+}
 export default defineComponent({
   setup() {
-    const canvas = ref<any>(null);
-    const width = ref<number>(500);
-    const height = ref<number>(500);
-    const tick = ref<number>(0);
-    const particles = ref<any[]>([])
-    const options = ref<any>({
-      particleAmount: 100,
-      defaultSpeed: 1,
-      addedSpeed: 2,
-      defaultRadius: 2,
-      communicationRadius: Math.pow(20, 2),
+    const options = ref<IOptions>({
+      width: 500,
+      height: 500,
+      amountParticles: 200,
+      speed: 1,
+      size: 5,
       i0: 3,
-      r0: 500
-    });
-    const loop = () => {
-      window.requestAnimationFrame(loop);
-      tick.value++;
-      canvas.value.fillStyle = "#222";
-      canvas.value.fillRect(0, 0, width.value, height.value);
-      for(let i = 0; i < particles.value.length; i++){
-        particles.value[i].update();
-        particles.value[i].draw();
+      infectionRadius: 10
+    })
+    const particles = ref<Particle[]>([])
+    const updateParticle = (particle: Particle) => {
+      if (particle.x >= options.value.width || particle.x <= 0) {
+        particle.d.x *= -1;
       }
-      for (let a = 0; a < particles.value.length; a++) {
-        drawConnections(particles.value[a], particles.value)
+      if (particle.y >= options.value.height || particle.y <= 0) {
+        particle.d.y *= -1;
       }
-    };
-    const setup = () => {
-      for(let i = 0; i < options.value.particleAmount - options.value.i0; i++){
-        particles.value.push(new Particle());
-      }
-      for(let i = 0; i < options.value.i0; i++){
-        particles.value.push(new Particle('I'));
-      }
-      window.requestAnimationFrame(loop);
-    };
-    const Particle = class {
-      status = 'S';
-      age = 0;
-      recovery = options.value.r0 + Math.random() * 100
-      x: number = Math.random() * width.value;
-      y: number = Math.random() * height.value;
-      speed: number = options.value.defaultSpeed + Math.random() * options.value.addedSpeed;
-      directionAngle: number = Math.floor(Math.random() * 360);
-      directions: { x: number; y: number } = {
-        x: Math.cos(this.directionAngle) * this.speed,
-        y: Math.sin(this.directionAngle) * this.speed
-      }
-      constructor(status: string = 'S') {
-        this.status = status
-      }
-      color() {
-        switch(this.status) {
-          case 'S':
-            return "#0388fc";
-          case 'I':
-            return '#fc0328';
-          case 'R':
-            return '#c2c2c2';
-        }
-      }
-      border() {
-        if (this.x >= width.value || this.x <= 0) {
-          this.directions.x *= -1;
-        }
-        if (this.y >= height.value || this.y <= 0) {
-          this.directions.y *= -1;
-        }
-        this.x > width.value ? this.x = width.value : this.x;
-        this.y > height.value ? this.y = height.value : this.y;
-        this.x < 0 ? this.x = 0 : this.x;
-        this.y < 0 ? this.y = 0 : this.y;
-      }
-      update() {
-        this.border()
-        this.x += this.directions.x;
-        this.y += this.directions.y;
-        if (this.status === 'I') {
-          this.age++;
-          if (this.age > this.recovery) {
-            this.status = 'R'
-          }
-        }
-      }
-      draw() {
-        canvas.value.beginPath();
-        canvas.value.arc(this.x, this.y, options.value.defaultRadius, 0, Math.PI * 2);
-        canvas.value.closePath();
-        canvas.value.fillStyle = this.color();
-        canvas.value.fill();
-      }
+      particle.x > options.value.width ? particle.x = options.value.width : particle.x;
+      particle.y > options.value.height ? particle.y = options.value.height : particle.y;
+      particle.x < 0 ? particle.x = 0 : particle.x;
+      particle.y < 0 ? particle.y = 0 : particle.y;
+      particle.x += particle.d.x;
+      particle.y += particle.d.y;
     }
-    const calcDistance = (x1: number, y1: number, x2: number, y2: number) => Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2);
-    const drawConnections = (point1: any, father: any[]) => {
-      for (let i = 0; i < father.length; i++) {
-        const distance = calcDistance(point1.x, point1.y, father[i].x, father[i].y);
-        const opacity = 1 - distance / options.value.communicationRadius;
-        if (opacity > 0 && point1.status === 'I') {
-          canvas.value.lineWidth = opacity;
-          canvas.value.strokeStyle = "rgba(255,255,255,0.5)";
-          canvas.value.beginPath();
-          canvas.value.moveTo(point1.x, point1.y);
-          canvas.value.lineTo(father[i].x, father[i].y);
-          canvas.value.closePath();
-          canvas.value.stroke();
-          if (father[i].status === 'S') {
-            if (Math.random() < 0.01) {
-              father[i].status = 'I'
+    const calcDistance = (p1: Particle, p2: Particle) => {
+      return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2))
+    }
+    const calcConnections = (p1: Particle) => {
+      if (p1.status === STATUS.I) {
+        for (let i = 0; i < options.value.amountParticles; i++) {
+          if (particles.value[i].status === STATUS.S) {
+            const distance = calcDistance(p1, particles.value[i])
+    
+            if (distance && distance <= options.value.infectionRadius) {
+              particles.value[i].status = STATUS.I
             }
           }
         }
       }
     }
+    const sketch = (p5: any) => {
+      p5.setup = () => {
+        p5.createCanvas(options.value.width, options.value.height);
+        for (let i = 0; i < options.value.amountParticles - options.value.i0; i++) {
+          particles.value.push(new Particle(STATUS.S, options.value))
+        }
+        for (let i = 0; i < options.value.i0; i++) {
+          particles.value.push(new Particle(STATUS.I, options.value))
+        }
+      };
+      p5.draw = () => {
+        p5.background(33, 33, 33);
+        for (let i = 0; i < options.value.amountParticles; i++) {
+          updateParticle(particles.value[i])
+          p5.fill(STATUS_COLOR[particles.value[i].status])
+          p5.ellipse(particles.value[i].x, particles.value[i].y, options.value.size, options.value.size)
+        }
+        for (let i = 0; i < options.value.amountParticles; i++) {
+          calcConnections(particles.value[i])
+        }
+      };
+    }
     onMounted(() => {
-      const canvasBody: any = document.getElementById("simulation-window");
-      canvas.value = canvasBody.getContext("2d");
-      canvasBody.width = width.value;
-      canvasBody.height = height.value;
-      setup();
-    });
-    return {};
-  },
+      new P5(sketch, 'simulation-window');
+    })
+    return {
+      options
+    }
+  }
 });

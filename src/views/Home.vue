@@ -8,59 +8,93 @@
 import { defineComponent, onMounted, ref } from "vue";
 import P5 from 'p5';
 
-class People {
-  x: any
-  y: any
-  diameter: any
-  xSpeed: any
-  ySpeed: any
-  fill: any
-  radius: any
-  sick: any
+enum STATUS {
+  S = 'S',
+  I = 'I',
+  R = 'R'
+}
+enum STATUS_COLOR {
+  S = '#256dd9',
+  I = '#c93030',
+  R = 'white'
+}
+interface IOptions {
+  width: number;
+  height: number;
+  amountParticles: number;
+  speed: number;
+  size: number;
+  i0: number;
+  infectionRadius: number;
+}
 
-  constructor() {
-    //all variables declared in here by this.
+class Particle {
+  x: number
+  y: number
+
+  speed: number;
+  directions: number;
+  d: { x: number, y: number };
+
+  status: STATUS = STATUS.S;
+
+  constructor(status: STATUS) {
     this.x = Math.random() * 500;
     this.y = Math.random() * 500;
-    this.diameter = 3;
-    this.xSpeed = (Math.random() - 1);
-    this.ySpeed = (Math.random() - 1);
-    this.fill = "white";
-    this.radius = 3;
-    this.sick = false;
+    this.speed = 1 + Math.random() * 2 * 1
+    this.directions = Math.floor(Math.random() * 360)
+    
+    this.d = {
+      x: Math.cos(this.directions) * this.speed,
+      y: Math.sin(this.directions) * this.speed
+    }
+
+    this.status = status;
   }
   move() {
-    var speedMultiplier = 1;
-    this.x += this.xSpeed * speedMultiplier;
-    this.y += this.ySpeed * speedMultiplier;
-    //safety so can't go out
-    if (this.x >= 500) this.xSpeed = -this.xSpeed;
-    if (this.x <= 0) this.xSpeed = -this.xSpeed;
-    if (this.y >= 500) this.ySpeed = -this.ySpeed;
-    if (this.y <= 0) this.ySpeed = -this.ySpeed;
+    if (this.x >= 500 || this.x <= 0) {
+      this.d.x *= -1;
+    }
+    if (this.y >= 500 || this.y <= 0) {
+      this.d.y *= -1;
+    }
+    this.x > 500 ? this.x = 500 : this.x;
+    this.y > 500 ? this.y = 500 : this.y;
+    this.x < 0 ? this.x = 0 : this.x;
+    this.y < 0 ? this.y = 0 : this.y;
+    this.x += this.d.x;
+    this.y += this.d.y;
   }
   infected() {
     //set if loop then make bool false for reset
-    this.fill = "red";
-    this.sick = true;
+    this.status = STATUS.I;
   }
   intersects(other: any) {
     var d = Math.sqrt(Math.pow(other.x - this.x, 2) + Math.pow(other.y - this.y, 2));
-    return d < this.radius;
+    return d < 5;
   }
   cured() {
-    this.fill = "white";
-    this.sick = false;
+    this.status = STATUS.R;
   }
 }
 
 export default defineComponent({
   setup() {
+    const options = ref<IOptions>({
+      width: 500,
+      height: 500,
+      amountParticles: 200,
+      speed: 1,
+      size: 4,
+      i0: 3,
+      infectionRadius: 10
+    })
+
     const sketch = (p5: any) => {
 
       let person: any;
       //array
-      let people: any[] = [];
+      let people: Particle[] = [];
 
       let create: any = true;
 
@@ -68,15 +102,14 @@ export default defineComponent({
 
       function virus() {
         people[0].infected();
-        for (var i = 0; i < people.length; i++) {
-          //runs through the array and does both functions for all objects
+        for (let i = 0; i < people.length; i++) {
           people[i].move();
-          p5.fill(people[i].fill);
-          p5.ellipse(people[i].x, people[i].y, people[i].diameter, people[i].diameter);
+          p5.fill(STATUS_COLOR[people[i].status]);
+          p5.ellipse(people[i].x, people[i].y, options.value.size, options.value.size);
         }
-        for (var i = 0; i < people.length; i++) {
-          for (var j = 0; j < people.length; j++) {
-            if (j != i && people[i].intersects(people[j]) && people[j].sick == true) {
+        for (let i = 0; i < people.length; i++) {
+          for (let j = 0; j < people.length; j++) {
+            if (j != i && people[i].intersects(people[j]) && people[j].status === STATUS.I) {
               people[i].infected();
             }
           }
@@ -87,7 +120,7 @@ export default defineComponent({
         p5.createCanvas(500, 500);
 
         for (let i = 0; i < 1000; i++) {
-          people.push(new People());
+          people.push(new Particle(STATUS.S));
         }
       };
 
