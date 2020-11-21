@@ -13,12 +13,14 @@
       </div>
     </div>
     <div>
-      <div class="text-center">Graphischer Verlauf</div>
-      <div id="chart" class="mt-6 mx-auto block" />
+<!--       <div class="text-center">Graphischer Verlauf</div>
+      <div id="chart" class="mt-6 mx-auto block" /> -->
       <div class="text-center">Startbedingungen</div>
       <div class="m-auto" style="width: 500px">
         <div>Populationsgröße</div>
         <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="10" :max="1000" :interval="1" v-model="options.amountParticles"></vue-slider>
+        <div class="mt-8">Infizierte</div>
+        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="50" :interval="1" v-model="options.i0"></vue-slider>
       </div>
       <div class="text-center mt-8">Dynamische Variablen</div>
       <div class="m-auto" style="width: 500px">
@@ -126,7 +128,7 @@ export default defineComponent({
       amountParticles: 500,
       speed: 0.5,
       size: 4,
-      i0: 2,
+      i0: 3,
       infectionRadius: 7,
       infectionRate: 0.025,
       recovery: 350
@@ -263,7 +265,7 @@ export default defineComponent({
           }
   
           if (counter.value % 10 === 0) {
-            chart.value.updateSeries(chartSeries)
+            // chart.value.updateSeries(chartSeries)
           }
   
           counter.value++;
@@ -317,8 +319,8 @@ export default defineComponent({
     onMounted(() => {
       p5sketch.value = new P5(sketch, 'simulation-window');
 
-      chart.value = new ApexCharts(document.getElementById('chart'), chartOptions.value);
-      chart.value.render()
+      // chart.value = new ApexCharts(document.getElementById('chart'), chartOptions.value);
+      // chart.value.render()
     })
 
     return {
