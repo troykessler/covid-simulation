@@ -2,17 +2,32 @@
   <div class="grid grid-cols-2 m-6 text-white">
     <div>
       <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ removed }}</div>
-      <div id="simulation-window" class="mt-6 mx-auto block"></div>
+      <div id="simulation-window" class="mt-4 mx-auto block"></div>
+      <div class="flex justify-center items-center mt-5">
+        <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2" @click="play = !play">
+          <i :class="`mdi mdi-${play ? 'pause' : 'play'} text-2xl`"></i>
+        </button>
+        <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2" @click="restartSimulation">
+          <i class="mdi mdi-replay text-2xl"></i>
+        </button>
+      </div>
     </div>
     <div>
       <div class="text-center">Graphischer Verlauf</div>
       <div id="chart" class="mt-6 mx-auto block" />
-      <div class="text-center">Variablen</div>
+      <div class="text-center">Startbedingungen</div>
       <div class="m-auto" style="width: 500px">
-        <div class="mt-8">Größe</div>
-        <vue-slider class="mt-1 mr-6" :min="1" :max="15" :interval="1" v-model="options.size"></vue-slider>
+        <div>Populationsgröße</div>
+        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="10" :max="1000" :interval="1" v-model="options.amountParticles"></vue-slider>
+      </div>
+      <div class="text-center mt-8">Dynamische Variablen</div>
+      <div class="m-auto" style="width: 500px">
+        <div>Größe</div>
+        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="15" :interval="1" v-model="options.size"></vue-slider>
         <div class="mt-8">Infektionsradius</div>
-        <vue-slider class="mt-1 mr-6" :min="1" :max="50" :interval="1" v-model="options.infectionRadius"></vue-slider>
+        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="50" :interval="1" v-model="options.infectionRadius"></vue-slider>
+        <div class="mt-8">Infektionswahrscheinlichkeit</div>
+        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="0.2" :interval="0.005" v-model="options.infectionRate"></vue-slider>
       </div>
     </div>
   </div>
@@ -102,6 +117,9 @@ export default defineComponent({
     VueSlider
   },
   setup() {
+    const play = ref<boolean>(true)
+    const p5sketch = ref<any>(null)
+
     const options = ref<IOptions>({
       width: 500,
       height: 500,
@@ -224,6 +242,7 @@ export default defineComponent({
 
       p5.setup = () => {
         p5.createCanvas(500, 500);
+        particles = []
 
         for (let i = 0; i < options.value.amountParticles - options.value.i0; i++) {
           particles.push(new Particle(STATUS.S, options.value));
@@ -235,23 +254,68 @@ export default defineComponent({
       };
 
       p5.draw = () => {
-        p5.background(33, 33, 33);
-        loop();
-
-        if (counter.value % 10) {
-          updateChart()
+        if (play.value) {
+          p5.background(33, 33, 33);
+          loop();
+  
+          if (counter.value % 10) {
+            // updateChart()
+          }
+  
+          if (counter.value % 10 === 0) {
+            chart.value.updateSeries(chartSeries)
+          }
+  
+          counter.value++;
         }
-
-        if (counter.value % 60 === 0) {
-          chart.value.updateSeries(chartSeries)
-        }
-
-        counter.value++;
       };
     }
 
+    const restartSimulation = () => {
+      play.value = true;
+      counter.value = 0;
+      chartOptions.value = {
+        ...chartOptions.value,
+        series: [
+          {
+            name: 'Susceptibles',
+            data: []
+          },
+          {
+            name: 'Infected',
+            data: []
+          },
+          {
+            name: 'Removed',
+            data: []
+          }
+        ]
+      }
+
+      chartSeries.value = [
+        {
+          name: 'Susceptibles',
+          data: []
+        },
+        {
+          name: 'Infected',
+          data: []
+        },
+        {
+          name: 'Removed',
+          data: []
+        }
+      ]
+
+      susceptibles.value = options.value.amountParticles - options.value.i0
+      infected.value = options.value.i0
+      removed.value = 0
+
+      p5sketch.value.setup()
+    }
+
     onMounted(() => {
-      new P5(sketch, 'simulation-window');
+      p5sketch.value = new P5(sketch, 'simulation-window');
 
       chart.value = new ApexCharts(document.getElementById('chart'), chartOptions.value);
       chart.value.render()
@@ -261,7 +325,9 @@ export default defineComponent({
       susceptibles,
       infected,
       removed,
-      options
+      options,
+      play,
+      restartSimulation
     }
   }
 });

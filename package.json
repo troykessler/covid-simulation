@@ -7,10 +7,12 @@
     "build": "vue-cli-service build"
   },
   "dependencies": {
+    "@mdi/font": "^5.8.55",
     "apexcharts": "^3.22.0",
-    "autoprefixer": "^9.0.0",
+    "autoprefixer": "^9",
     "p5": "^1.1.9",
-    "tailwindcss": "^1.9.4",
+    "postcss": "^7",
+    "tailwindcss": "npm:@tailwindcss/postcss7-compat",
     "vue": "^3.0.0",
     "vue-apexcharts": "^1.6.0",
     "vue-router": "^4.0.0-0",
