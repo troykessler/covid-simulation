@@ -30,6 +30,8 @@
         <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="50" :interval="1" v-model="options.infectionRadius"></vue-slider>
         <div class="mt-8">Infektionswahrscheinlichkeit</div>
         <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="0.2" :interval="0.005" v-model="options.infectionRate"></vue-slider>
+        <div class="mt-8">Social Distancing</div>
+        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="1" :interval="0.01" v-model="options.socialDistancing"></vue-slider>
       </div>
     </div>
   </div>
@@ -63,6 +65,7 @@ interface IOptions {
   infectionRadius: number;
   infectionRate: number;
   recovery: number;
+  socialDistancing: number;
 }
 
 class Particle {
@@ -90,7 +93,7 @@ class Particle {
     }
   }
 
-  move(width: number, height: number) {
+  move(width: number, height: number, particles: Particle[], socialDistancing: number) {
     if (this.x >= width || this.x <= 0) {
       this.d.x *= -1;
     }
@@ -101,12 +104,28 @@ class Particle {
     this.y > height ? this.y = height : this.y;
     this.x < 0 ? this.x = 0 : this.x;
     this.y < 0 ? this.y = 0 : this.y;
+
     this.x += this.d.x;
     this.y += this.d.y;
+
+    for (let i = 0; i < particles.length; i++) {
+      const ang = Math.atan2(this.y - particles[i].y, this.x - particles[i].x);
+      const dist = Math.sqrt(Math.pow(particles[i].x - this.x, 2) + Math.pow(particles[i].y - this.y, 2));
+      const force = this.mapRange(socialDistancing, 0, 1, 0, 0.05) * dist;
+
+      if (dist < 25) {
+        this.x += force * Math.cos(ang);
+        this.y += force * Math.sin(ang);
+      }
+    }
 
     if (this.status === STATUS.I) {
       this.duration++;
     }
+  }
+
+  mapRange(value: number, low1: number, high1: number, low2: number, high2: number) {
+    return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
   }
 
   intersects(particle: Particle, radius: number) {
@@ -131,7 +150,8 @@ export default defineComponent({
       i0: 3,
       infectionRadius: 7,
       infectionRate: 0.025,
-      recovery: 350
+      recovery: 19 * 24,
+      socialDistancing: 0
     })
 
     const chart = ref<any>(null)
@@ -209,9 +229,10 @@ export default defineComponent({
       function loop() {
         const radius = options.value.infectionRadius;
         const infectionRate = options.value.infectionRate;
+        const socialDistancing = options.value.socialDistancing;
 
         for (let i = 0; i < particles.length; i++) {
-          particles[i].move(options.value.width, options.value.height);
+          particles[i].move(options.value.width, options.value.height, particles, socialDistancing);
 
           if (particles[i].status === STATUS.I && particles[i].duration > options.value.recovery) {
             particles[i].status = STATUS.R;
