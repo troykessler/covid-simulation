@@ -1,7 +1,7 @@
 <template>
   <div class="grid grid-cols-2 m-6 text-white">
     <div>
-      <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ removed }}</div>
+      <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D = {{ diseased }}</div>
       <div id="simulation-window" class="mt-4 mx-auto block"></div>
       <div class="flex justify-center items-center mt-5">
         <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2" @click="play = !play">
@@ -18,7 +18,7 @@
       <div class="text-center">Startbedingungen</div>
       <div class="m-auto" style="width: 500px">
         <div>Populationsgröße</div>
-        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="10" :max="1000" :interval="1" v-model="options.amountParticles"></vue-slider>
+        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="10" :max="1000" :interval="10" v-model="options.amountParticles"></vue-slider>
         <div class="mt-8">Infizierte</div>
         <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="50" :interval="1" v-model="options.i0"></vue-slider>
       </div>
@@ -32,6 +32,8 @@
         <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="0.2" :interval="0.005" v-model="options.infectionRate"></vue-slider>
         <div class="mt-8">Social Distancing</div>
         <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="1" :interval="0.01" v-model="options.socialDistancing"></vue-slider>
+        <div class="mt-8">Sterberate</div>
+        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="1" :interval="0.01" v-model="options.deathRate"></vue-slider>
       </div>
     </div>
   </div>
@@ -46,13 +48,15 @@ import VueSlider from 'vue-slider-component';
 enum STATUS {
   S = 'S',
   I = 'I',
-  R = 'R'
+  R = 'R',
+  D = 'D'
 }
 
 enum STATUS_COLOR {
   S = '#256dd9',
   I = '#c93030',
-  R = '#ffffff'
+  R = '#689c6b',
+  D = '#ffffff'
 }
 
 interface IOptions {
@@ -64,6 +68,7 @@ interface IOptions {
   i0: number;
   infectionRadius: number;
   infectionRate: number;
+  deathRate: number;
   recovery: number;
   socialDistancing: number;
 }
@@ -108,14 +113,16 @@ class Particle {
     this.x += this.d.x;
     this.y += this.d.y;
 
-    for (let i = 0; i < particles.length; i++) {
-      const ang = Math.atan2(this.y - particles[i].y, this.x - particles[i].x);
-      const dist = Math.sqrt(Math.pow(particles[i].x - this.x, 2) + Math.pow(particles[i].y - this.y, 2));
-      const force = this.mapRange(socialDistancing, 0, 1, 0, 0.05) * dist;
-
-      if (dist < 25) {
-        this.x += force * Math.cos(ang);
-        this.y += force * Math.sin(ang);
+    if (this.status !== STATUS.D) {
+      for (let i = 0; i < particles.length; i++) {
+        const ang = Math.atan2(this.y - particles[i].y, this.x - particles[i].x);
+        const dist = Math.sqrt(Math.pow(particles[i].x - this.x, 2) + Math.pow(particles[i].y - this.y, 2));
+        const force = this.mapRange(socialDistancing, 0, 1, 0, 0.05) * dist;
+  
+        if (dist < 25) {
+          this.x += force * Math.cos(ang);
+          this.y += force * Math.sin(ang);
+        }
       }
     }
 
@@ -150,6 +157,7 @@ export default defineComponent({
       i0: 3,
       infectionRadius: 7,
       infectionRate: 0.025,
+      deathRate: 0.02,
       recovery: 19 * 24,
       socialDistancing: 0
     })
@@ -159,7 +167,8 @@ export default defineComponent({
 
     const susceptibles = ref<number>(options.value.amountParticles - options.value.i0)
     const infected = ref<number>(options.value.i0)
-    const removed = ref<number>(0)
+    const recovered = ref<number>(0)
+    const diseased = ref<number>(0)
 
     const chartOptions = ref<any>({
       chart: {
@@ -180,7 +189,7 @@ export default defineComponent({
         curve: 'straight',
         width: 2
       },
-      colors: ['#256dd9', '#c93030', '#ffffff'],
+      colors: [STATUS_COLOR.S, STATUS_COLOR.I, STATUS_COLOR.R, STATUS_COLOR.D],
       xaxis: {
         labels: {
           show: false
@@ -196,7 +205,11 @@ export default defineComponent({
           data: []
         },
         {
-          name: 'Removed',
+          name: 'Recovered',
+          data: []
+        },
+        {
+          name: 'Diseased',
           data: []
         }
       ]
@@ -212,7 +225,11 @@ export default defineComponent({
         data: []
       },
       {
-        name: 'Removed',
+        name: 'Recovered',
+        data: []
+      },
+      {
+        name: 'Diseased',
         data: []
       }
     ]
@@ -220,7 +237,7 @@ export default defineComponent({
     const updateChart = () => {
       chartSeries[0].data = [...chartSeries[0].data, susceptibles.value]
       chartSeries[1].data = [...chartSeries[1].data, infected.value]
-      chartSeries[2].data = [...chartSeries[2].data, removed.value]
+      chartSeries[2].data = [...chartSeries[2].data, recovered.value]
     }
 
     const sketch = (p5: any) => {
@@ -235,9 +252,17 @@ export default defineComponent({
           particles[i].move(options.value.width, options.value.height, particles, socialDistancing);
 
           if (particles[i].status === STATUS.I && particles[i].duration > options.value.recovery) {
-            particles[i].status = STATUS.R;
-            infected.value--;
-            removed.value++;
+            if (Math.random() < options.value.deathRate) {
+              particles[i].status = STATUS.D;
+              particles[i].d.x = 0;
+              particles[i].d.y = 0;
+              infected.value--;
+              diseased.value++;
+            } else {
+              particles[i].status = STATUS.R;
+              infected.value--;
+              recovered.value++;
+            }
           }
 
           p5.fill(STATUS_COLOR[particles[i].status]);
@@ -309,7 +334,11 @@ export default defineComponent({
             data: []
           },
           {
-            name: 'Removed',
+            name: 'Recovered',
+            data: []
+          },
+          {
+            name: 'Diseased',
             data: []
           }
         ]
@@ -325,14 +354,19 @@ export default defineComponent({
           data: []
         },
         {
-          name: 'Removed',
+          name: 'Recovered',
+          data: []
+        },
+        {
+          name: 'Diseased',
           data: []
         }
       ]
 
-      susceptibles.value = options.value.amountParticles - options.value.i0
-      infected.value = options.value.i0
-      removed.value = 0
+      susceptibles.value = options.value.amountParticles - options.value.i0;
+      infected.value = options.value.i0;
+      recovered.value = 0;
+      diseased.value = 0;
 
       p5sketch.value.setup()
     }
@@ -347,7 +381,8 @@ export default defineComponent({
     return {
       susceptibles,
       infected,
-      removed,
+      recovered,
+      diseased,
       options,
       play,
       restartSimulation
