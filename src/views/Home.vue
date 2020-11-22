@@ -178,6 +178,9 @@ export default defineComponent({
         type: 'line',
         zoom: {
           enabled: false
+        },
+        animations: {
+          enabled: true
         }
       },
       dataLabels: {
@@ -306,12 +309,9 @@ export default defineComponent({
         if (play.value) {
           p5.background(33, 33, 33);
           loop();
-  
-          if (counter.value % 6 === 0) {
-            updateChart();
-          }
 
-          if (counter.value % (7 * 24) === 0) {
+          if (counter.value % 24 === 0) {
+            updateChart();
             chart.value.updateSeries(chartSeries);
           }
   
