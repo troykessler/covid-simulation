@@ -13,8 +13,8 @@
       </div>
     </div>
     <div>
-<!--       <div class="text-center">Graphischer Verlauf</div>
-      <div id="chart" class="mt-6 mx-auto block" /> -->
+      <div class="text-center">Graphischer Verlauf</div>
+      <div id="chart" class="mt-6 mx-auto block" />
       <div class="text-center">Startbedingungen</div>
       <div class="m-auto" style="width: 500px">
         <div>Populationsgröße</div>
@@ -102,13 +102,15 @@ class Particle {
     if (this.x >= width || this.x <= 0) {
       this.d.x *= -1;
     }
+
     if (this.y >= height || this.y <= 0) {
       this.d.y *= -1;
     }
-    this.x > width ? this.x = width : this.x;
+    
+    /* this.x > width ? this.x = width : this.x;
     this.y > height ? this.y = height : this.y;
     this.x < 0 ? this.x = 0 : this.x;
-    this.y < 0 ? this.y = 0 : this.y;
+    this.y < 0 ? this.y = 0 : this.y; */
 
     this.x += this.d.x;
     this.y += this.d.y;
@@ -151,7 +153,7 @@ export default defineComponent({
     const options = ref<IOptions>({
       width: 500,
       height: 500,
-      amountParticles: 500,
+      amountParticles: 300,
       speed: 0.5,
       size: 4,
       i0: 3,
@@ -238,21 +240,20 @@ export default defineComponent({
       chartSeries[0].data = [...chartSeries[0].data, susceptibles.value]
       chartSeries[1].data = [...chartSeries[1].data, infected.value]
       chartSeries[2].data = [...chartSeries[2].data, recovered.value]
+      chartSeries[3].data = [...chartSeries[3].data, diseased.value]
     }
 
     const sketch = (p5: any) => {
       let particles: Particle[] = [];
 
       function loop() {
-        const radius = options.value.infectionRadius;
-        const infectionRate = options.value.infectionRate;
-        const socialDistancing = options.value.socialDistancing;
+        const ops: IOptions = options.value;
 
         for (let i = 0; i < particles.length; i++) {
-          particles[i].move(options.value.width, options.value.height, particles, socialDistancing);
+          particles[i].move(ops.width, ops.height, particles, ops.socialDistancing);
 
-          if (particles[i].status === STATUS.I && particles[i].duration > options.value.recovery) {
-            if (Math.random() < options.value.deathRate) {
+          if (particles[i].status === STATUS.I && particles[i].duration > ops.recovery) {
+            if (Math.random() < ops.deathRate) {
               particles[i].status = STATUS.D;
               particles[i].d.x = 0;
               particles[i].d.y = 0;
@@ -275,8 +276,8 @@ export default defineComponent({
               let particleJ: Particle = particles[j];
 
               if (particleI.status === STATUS.I && particleJ.status === STATUS.S) {
-                if (particleI.intersects(particleJ, radius)) {
-                  if (Math.random() < infectionRate) {
+                if (particleI.intersects(particleJ, ops.infectionRadius)) {
+                  if (Math.random() < ops.infectionRate) {
                     particleJ.status = STATUS.I;
                     susceptibles.value--;
                     infected.value++;
@@ -289,7 +290,7 @@ export default defineComponent({
       }
 
       p5.setup = () => {
-        p5.createCanvas(500, 500);
+        p5.createCanvas(options.value.width, options.value.height);
         particles = []
 
         for (let i = 0; i < options.value.amountParticles - options.value.i0; i++) {
@@ -306,15 +307,20 @@ export default defineComponent({
           p5.background(33, 33, 33);
           loop();
   
-          if (counter.value % 10) {
-            // updateChart()
+          if (counter.value % 6 === 0) {
+            updateChart();
           }
-  
-          if (counter.value % 10 === 0) {
-            // chart.value.updateSeries(chartSeries)
+
+          if (counter.value % (7 * 24) === 0) {
+            chart.value.updateSeries(chartSeries);
           }
   
           counter.value++;
+
+          if (!infected.value) {
+            play.value = false;
+            chart.value.updateSeries(chartSeries);
+          }
         }
       };
     }
@@ -374,8 +380,8 @@ export default defineComponent({
     onMounted(() => {
       p5sketch.value = new P5(sketch, 'simulation-window');
 
-      // chart.value = new ApexCharts(document.getElementById('chart'), chartOptions.value);
-      // chart.value.render()
+      chart.value = new ApexCharts(document.getElementById('chart'), chartOptions.value);
+      chart.value.render()
     })
 
     return {
