@@ -14,7 +14,7 @@
     </div>
     <div>
       <div class="text-center">Graphischer Verlauf</div>
-      <div id="chart" class="mt-6 mx-auto block" />
+      <canvas id="chart" width="500"></canvas>
       <div class="text-center">Startbedingungen</div>
       <div class="m-auto" style="width: 500px">
         <div>Populationsgröße</div>
@@ -42,8 +42,8 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from "vue";
 import P5 from 'p5';
-import ApexCharts from 'apexcharts';
 import VueSlider from 'vue-slider-component';
+import Chart from 'chart.js';
 
 enum STATUS {
   S = 'S',
@@ -307,19 +307,24 @@ export default defineComponent({
           p5.background(33, 33, 33);
           loop();
   
-          if (counter.value % 6 === 0) {
-            updateChart();
+          if (counter.value % 24 === 0) {
+            chart.value.data.labels.push(counter.value);
+            chart.value.data.datasets[0].data.push(susceptibles.value);
+            chart.value.data.datasets[1].data.push(infected.value);
+            chart.value.data.datasets[2].data.push(recovered.value);
+            chart.value.data.datasets[3].data.push(diseased.value);
+            chart.value.update()
           }
 
           if (counter.value % (7 * 24) === 0) {
-            chart.value.updateSeries(chartSeries);
+            // chart.value.updateSeries(chartSeries);
           }
   
           counter.value++;
 
           if (!infected.value) {
             play.value = false;
-            chart.value.updateSeries(chartSeries);
+            // chart.value.updateSeries(chartSeries);
           }
         }
       };
@@ -380,8 +385,54 @@ export default defineComponent({
     onMounted(() => {
       p5sketch.value = new P5(sketch, 'simulation-window');
 
-      chart.value = new ApexCharts(document.getElementById('chart'), chartOptions.value);
-      chart.value.render()
+      var ctx = (document.getElementById('chart') as any).getContext('2d');
+      chart.value = new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: [],
+          datasets: [
+            {
+              label: 'Susceptibles',
+              borderColor: STATUS_COLOR[STATUS.S],
+              data: []
+            },
+            {
+              label: 'Infected',
+              borderColor: STATUS_COLOR[STATUS.I],
+              data: []
+            },
+            {
+              label: 'Recovered',
+              borderColor: STATUS_COLOR[STATUS.R],
+              data: []
+            },
+            {
+              label: 'Diseased',
+              borderColor: STATUS_COLOR[STATUS.D],
+              data: []
+            },
+          ]
+        },
+
+        // Configuration options go here
+        options: {
+          animation: {
+            duration: 0 // general animation time
+          },
+          hover: {
+            animationDuration: 0 // duration of animations when hovering an item
+          },
+          responsiveAnimationDuration: 0, // animation duration after a resize
+          elements: {
+            line: {
+              tension: 0 // disables bezier curves
+            },
+            point:{
+              radius: 0
+            }
+          }
+        }
+      });
     })
 
     return {
@@ -391,7 +442,8 @@ export default defineComponent({
       diseased,
       options,
       play,
-      restartSimulation
+      restartSimulation,
+      chartSeries
     }
   }
 });
@@ -405,5 +457,6 @@ export default defineComponent({
 }
 #chart {
   width: 500px;
+  height: 300px;
 }
 </style>
