@@ -220,7 +220,7 @@ export default defineComponent({
       ]
     })
 
-    const chartSeries: any = [
+    let chartSeries: any = [
       {
         name: 'Susceptibles',
         data: []
@@ -328,29 +328,8 @@ export default defineComponent({
     const restartSimulation = () => {
       play.value = true;
       counter.value = 0;
-      chartOptions.value = {
-        ...chartOptions.value,
-        series: [
-          {
-            name: 'Susceptibles',
-            data: []
-          },
-          {
-            name: 'Infected',
-            data: []
-          },
-          {
-            name: 'Recovered',
-            data: []
-          },
-          {
-            name: 'Diseased',
-            data: []
-          }
-        ]
-      }
 
-      chartSeries.value = [
+      chartSeries = [
         {
           name: 'Susceptibles',
           data: []
@@ -368,6 +347,13 @@ export default defineComponent({
           data: []
         }
       ]
+
+      chartOptions.value = {
+        ...chartOptions.value,
+        series: chartSeries
+      }
+
+      chart.value.updateSeries(chartSeries)
 
       susceptibles.value = options.value.amountParticles - options.value.i0;
       infected.value = options.value.i0;
