@@ -1,40 +1,43 @@
 <template>
-  <div class="grid grid-cols-2 m-6 text-white">
-    <div>
-      <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D = {{ diseased }}</div>
-      <div id="simulation-window" class="mt-4 mx-auto block"></div>
-      <div class="flex justify-center items-center mt-5">
-        <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2" @click="play = !play">
-          <i :class="`mdi mdi-${play ? 'pause' : 'play'} text-2xl`"></i>
-        </button>
-        <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2" @click="restartSimulation">
-          <i class="mdi mdi-replay text-2xl"></i>
-        </button>
+  <div>
+    <div class="grid grid-cols-2 m-6 text-white">
+      <div>
+        <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D = {{ diseased }}</div>
+        <div id="simulation-window" class="mt-4 mx-auto block"></div>
+        <div class="flex justify-center items-center mt-5">
+          <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2" @click="play = !play">
+            <i :class="`mdi mdi-${play ? 'pause' : 'play'} text-2xl`"></i>
+          </button>
+          <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2" @click="restartSimulation">
+            <i class="mdi mdi-replay text-2xl"></i>
+          </button>
+        </div>
+      </div>
+      <div>
+        <div class="text-center">Startbedingungen</div>
+        <div class="m-auto" style="width: 500px">
+          <div>Populationsgröße</div>
+          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="10" :max="1000" :interval="10" v-model="options.amountParticles"></vue-slider>
+          <div class="mt-8">Infizierte</div>
+          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="50" :interval="1" v-model="options.i0"></vue-slider>
+        </div>
+        <div class="text-center mt-8">Dynamische Variablen</div>
+        <div class="m-auto" style="width: 500px">
+          <div>Größe</div>
+          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="15" :interval="1" v-model="options.size"></vue-slider>
+          <div class="mt-8">Infektionsradius</div>
+          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="50" :interval="1" v-model="options.infectionRadius"></vue-slider>
+          <div class="mt-8">Infektionswahrscheinlichkeit</div>
+          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="0.2" :interval="0.005" v-model="options.infectionRate"></vue-slider>
+          <div class="mt-8">Social Distancing</div>
+          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="1" :interval="0.01" v-model="options.socialDistancing"></vue-slider>
+          <div class="mt-8">Sterberate</div>
+          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="1" :interval="0.01" v-model="options.deathRate"></vue-slider>
+        </div>
       </div>
     </div>
     <div>
-      <div class="text-center">Graphischer Verlauf</div>
       <div id="chart" class="mt-6 mx-auto block" />
-      <div class="text-center">Startbedingungen</div>
-      <div class="m-auto" style="width: 500px">
-        <div>Populationsgröße</div>
-        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="10" :max="1000" :interval="10" v-model="options.amountParticles"></vue-slider>
-        <div class="mt-8">Infizierte</div>
-        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="50" :interval="1" v-model="options.i0"></vue-slider>
-      </div>
-      <div class="text-center mt-8">Dynamische Variablen</div>
-      <div class="m-auto" style="width: 500px">
-        <div>Größe</div>
-        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="15" :interval="1" v-model="options.size"></vue-slider>
-        <div class="mt-8">Infektionsradius</div>
-        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="50" :interval="1" v-model="options.infectionRadius"></vue-slider>
-        <div class="mt-8">Infektionswahrscheinlichkeit</div>
-        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="0.2" :interval="0.005" v-model="options.infectionRate"></vue-slider>
-        <div class="mt-8">Social Distancing</div>
-        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="1" :interval="0.01" v-model="options.socialDistancing"></vue-slider>
-        <div class="mt-8">Sterberate</div>
-        <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="1" :interval="0.01" v-model="options.deathRate"></vue-slider>
-      </div>
     </div>
   </div>
 </template>
@@ -158,8 +161,8 @@ export default defineComponent({
       size: 4,
       i0: 3,
       infectionRadius: 7,
-      infectionRate: 0.025,
-      deathRate: 0.02,
+      infectionRate: 0.04,
+      deathRate: 0.05,
       recovery: 19 * 24,
       socialDistancing: 0
     })
