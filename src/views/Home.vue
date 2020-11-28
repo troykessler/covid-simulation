@@ -13,141 +13,26 @@
           </button>
         </div>
       </div>
-      <div>
-        <div class="text-center">Startbedingungen</div>
-        <div class="m-auto" style="width: 500px">
-          <div>Populationsgröße</div>
-          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="10" :max="1000" :interval="10" v-model="options.amountParticles"></vue-slider>
-          <div class="mt-8">Infizierte</div>
-          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="50" :interval="1" v-model="options.i0"></vue-slider>
-        </div>
-        <div class="text-center mt-8">Dynamische Variablen</div>
-        <div class="m-auto" style="width: 500px">
-          <div>Größe</div>
-          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="15" :interval="1" v-model="options.size"></vue-slider>
-          <div class="mt-8">Infektionsradius</div>
-          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="1" :max="50" :interval="1" v-model="options.infectionRadius"></vue-slider>
-          <div class="mt-8">Infektionswahrscheinlichkeit</div>
-          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="0.2" :interval="0.005" v-model="options.infectionRate"></vue-slider>
-          <div class="mt-8">Social Distancing</div>
-          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="1" :interval="0.01" v-model="options.socialDistancing"></vue-slider>
-          <div class="mt-8">Sterberate</div>
-          <vue-slider class="mt-1 mr-6" :drag-on-click="true" :min="0" :max="1" :interval="0.01" v-model="options.deathRate"></vue-slider>
-        </div>
-      </div>
+      <simulation-variables v-model="options" />
     </div>
     <div>
-      <div id="chart" class="mt-6 mx-auto block" />
+      <population-chart :chartSeries="chartSeries" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from "vue";
+import SimulationVariables from '@/components/SimulationVariables.vue';
+import PopulationChart from '@/components/PopulationChart.vue';
+import { STATUS, STATUS_COLOR, IOptions } from '@/utils/types';
+import { Particle } from '@/utils/Particle.class';
 import P5 from 'p5';
-import ApexCharts from 'apexcharts';
-import VueSlider from 'vue-slider-component';
-
-enum STATUS {
-  S = 'S',
-  I = 'I',
-  R = 'R',
-  D = 'D'
-}
-
-enum STATUS_COLOR {
-  S = '#256dd9',
-  I = '#c93030',
-  R = '#689c6b',
-  D = '#ffffff'
-}
-
-interface IOptions {
-  width: number;
-  height: number;
-  amountParticles: number;
-  speed: number;
-  size: number;
-  i0: number;
-  infectionRadius: number;
-  infectionRate: number;
-  deathRate: number;
-  recovery: number;
-  socialDistancing: number;
-}
-
-class Particle {
-  x: number
-  y: number
-
-  speed: number;
-  directions: number;
-  d: { x: number, y: number };
-
-  status: STATUS = STATUS.S;
-  duration: number = 0;
-
-  constructor(status: STATUS, options: IOptions) {
-    this.status = status;
-
-    this.x = Math.random() * options.width;
-    this.y = Math.random() * options.height;
-    this.speed = options.speed + Math.random() * 2 * options.speed
-    this.directions = Math.floor(Math.random() * 360)
-    
-    this.d = {
-      x: Math.cos(this.directions) * this.speed,
-      y: Math.sin(this.directions) * this.speed
-    }
-  }
-
-  move(width: number, height: number, particles: Particle[], socialDistancing: number) {
-    if (this.x >= width || this.x <= 0) {
-      this.d.x *= -1;
-    }
-
-    if (this.y >= height || this.y <= 0) {
-      this.d.y *= -1;
-    }
-    
-    /* this.x > width ? this.x = width : this.x;
-    this.y > height ? this.y = height : this.y;
-    this.x < 0 ? this.x = 0 : this.x;
-    this.y < 0 ? this.y = 0 : this.y; */
-
-    this.x += this.d.x;
-    this.y += this.d.y;
-
-    if (this.status !== STATUS.D) {
-      for (let i = 0; i < particles.length; i++) {
-        const ang = Math.atan2(this.y - particles[i].y, this.x - particles[i].x);
-        const dist = Math.sqrt(Math.pow(particles[i].x - this.x, 2) + Math.pow(particles[i].y - this.y, 2));
-        const force = this.mapRange(socialDistancing, 0, 1, 0, 0.05) * dist;
-  
-        if (dist < 25) {
-          this.x += force * Math.cos(ang);
-          this.y += force * Math.sin(ang);
-        }
-      }
-    }
-
-    if (this.status === STATUS.I) {
-      this.duration++;
-    }
-  }
-
-  mapRange(value: number, low1: number, high1: number, low2: number, high2: number) {
-    return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
-  }
-
-  intersects(particle: Particle, radius: number) {
-    return Math.sqrt(Math.pow(particle.x - this.x, 2) + Math.pow(particle.y - this.y, 2)) < radius;
-  }
-}
 
 export default defineComponent({
   components: {
-    VueSlider
+    SimulationVariables,
+    PopulationChart
   },
   setup() {
     const play = ref<boolean>(true)
@@ -163,67 +48,18 @@ export default defineComponent({
       infectionRadius: 7,
       infectionRate: 0.04,
       deathRate: 0.05,
-      recovery: 19 * 24,
+      recoveryRate: 19 * 24,
       socialDistancing: 0
     })
 
-    const chart = ref<any>(null)
-    const counter = ref<number>(0)
+    const counter = ref<number>(0);
 
-    const susceptibles = ref<number>(options.value.amountParticles - options.value.i0)
-    const infected = ref<number>(options.value.i0)
-    const recovered = ref<number>(0)
-    const diseased = ref<number>(0)
+    const susceptibles = ref<number>(options.value.amountParticles - options.value.i0);
+    const infected = ref<number>(options.value.i0);
+    const recovered = ref<number>(0);
+    const diseased = ref<number>(0);
 
-    const chartOptions = ref<any>({
-      chart: {
-        height: 250,
-        type: 'line',
-        zoom: {
-          enabled: false
-        },
-        animations: {
-          enabled: true
-        }
-      },
-      dataLabels: {
-        enabled: false
-      },
-      grid: {
-        borderColor: '#a9b3b8',
-        strokeDashArray: 1
-      },
-      stroke: {
-        curve: 'straight',
-        width: 2
-      },
-      colors: [STATUS_COLOR.S, STATUS_COLOR.I, STATUS_COLOR.R, STATUS_COLOR.D],
-      xaxis: {
-        labels: {
-          show: false
-        }
-      },
-      series: [
-        {
-          name: 'Susceptibles',
-          data: []
-        },
-        {
-          name: 'Infected',
-          data: []
-        },
-        {
-          name: 'Recovered',
-          data: []
-        },
-        {
-          name: 'Diseased',
-          data: []
-        }
-      ]
-    })
-
-    let chartSeries: any = [
+    const chartSeries: any = ref<any[]>([
       {
         name: 'Susceptibles',
         data: []
@@ -240,13 +76,13 @@ export default defineComponent({
         name: 'Diseased',
         data: []
       }
-    ]
+    ])
     
     const updateChart = () => {
-      chartSeries[0].data = [...chartSeries[0].data, susceptibles.value]
-      chartSeries[1].data = [...chartSeries[1].data, infected.value]
-      chartSeries[2].data = [...chartSeries[2].data, recovered.value]
-      chartSeries[3].data = [...chartSeries[3].data, diseased.value]
+      chartSeries.value[0].data = [...chartSeries.value[0].data, susceptibles.value]
+      chartSeries.value[1].data = [...chartSeries.value[1].data, infected.value]
+      chartSeries.value[2].data = [...chartSeries.value[2].data, recovered.value]
+      chartSeries.value[3].data = [...chartSeries.value[3].data, diseased.value]
     }
 
     const sketch = (p5: any) => {
@@ -258,7 +94,7 @@ export default defineComponent({
         for (let i = 0; i < particles.length; i++) {
           particles[i].move(ops.width, ops.height, particles, ops.socialDistancing);
 
-          if (particles[i].status === STATUS.I && particles[i].duration > ops.recovery) {
+          if (particles[i].status === STATUS.I && particles[i].duration > ops.recoveryRate) {
             if (Math.random() < ops.deathRate) {
               particles[i].status = STATUS.D;
               particles[i].d.x = 0;
@@ -297,14 +133,14 @@ export default defineComponent({
 
       p5.setup = () => {
         p5.createCanvas(options.value.width, options.value.height);
-        particles = []
+        particles = [];
 
         for (let i = 0; i < options.value.amountParticles - options.value.i0; i++) {
-          particles.push(new Particle(STATUS.S, options.value));
+          particles.push(new Particle(i, STATUS.S, options.value));
         }
 
         for (let i = 0; i < options.value.i0; i++) {
-          particles.push(new Particle(STATUS.I, options.value));
+          particles.push(new Particle(options.value.amountParticles + i, STATUS.I, options.value));
         }
       };
 
@@ -315,14 +151,12 @@ export default defineComponent({
 
           if (counter.value % 24 === 0) {
             updateChart();
-            chart.value.updateSeries(chartSeries);
           }
   
           counter.value++;
 
           if (!infected.value) {
             play.value = false;
-            chart.value.updateSeries(chartSeries);
           }
         }
       };
@@ -332,7 +166,7 @@ export default defineComponent({
       play.value = true;
       counter.value = 0;
 
-      chartSeries = [
+      chartSeries.value = [
         {
           name: 'Susceptibles',
           data: []
@@ -351,26 +185,16 @@ export default defineComponent({
         }
       ]
 
-      chartOptions.value = {
-        ...chartOptions.value,
-        series: chartSeries
-      }
-
-      chart.value.updateSeries(chartSeries)
-
       susceptibles.value = options.value.amountParticles - options.value.i0;
       infected.value = options.value.i0;
       recovered.value = 0;
       diseased.value = 0;
 
-      p5sketch.value.setup()
+      p5sketch.value.setup();
     }
 
     onMounted(() => {
       p5sketch.value = new P5(sketch, 'simulation-window');
-
-      chart.value = new ApexCharts(document.getElementById('chart'), chartOptions.value);
-      chart.value.render()
     })
 
     return {
@@ -380,7 +204,8 @@ export default defineComponent({
       diseased,
       options,
       play,
-      restartSimulation
+      restartSimulation,
+      chartSeries
     }
   }
 });
