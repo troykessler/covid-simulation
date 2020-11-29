@@ -46,8 +46,8 @@
         class="mt-1 mr-6"
         :drag-on-click="true"
         :min="0"
-        :max="0.2"
-        :interval="0.005"
+        :max="1"
+        :interval="0.01"
         v-model="modelValue.infectionRate"
       />
       <div class="mt-8">Social Distancing</div>

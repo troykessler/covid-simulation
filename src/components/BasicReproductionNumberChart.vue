@@ -1,5 +1,5 @@
 <template>
-  <div id="chart" class="mx-auto block" />
+  <div id="brn-chart" class="mx-auto block" />
 </template>
 
 <script lang="ts">
@@ -39,7 +39,7 @@ export default defineComponent({
         curve: 'straight',
         width: 2
       },
-      colors: [STATUS_COLOR.S, STATUS_COLOR.I, STATUS_COLOR.R, STATUS_COLOR.D],
+      colors: [STATUS_COLOR.S],
       xaxis: {
         labels: {
           show: false
@@ -47,19 +47,7 @@ export default defineComponent({
       },
       series: [
         {
-          name: 'Susceptibles',
-          data: []
-        },
-        {
-          name: 'Infected',
-          data: []
-        },
-        {
-          name: 'Recovered',
-          data: []
-        },
-        {
-          name: 'Diseased',
+          name: 'Basisreproduktionszahl',
           data: []
         }
       ]
@@ -76,7 +64,7 @@ export default defineComponent({
     )
     
     onMounted(() => {
-      chart.value = new ApexCharts(document.getElementById('chart'), chartOptions.value);
+      chart.value = new ApexCharts(document.getElementById('brn-chart'), chartOptions.value);
       chart.value.render();
     })
 

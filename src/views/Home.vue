@@ -1,8 +1,8 @@
 <template>
-  <div>
-    <div class="grid grid-cols-2 m-6 text-white">
+  <div class="text-white">
+    <div class="grid grid-cols-2 m-6">
       <div>
-        <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D = {{ diseased }}</div>
+        <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D = {{ diseased }} | R0 = {{ basicReproductionNumber }}</div>
         <div id="simulation-window" class="mt-4 mx-auto block"></div>
         <div class="flex justify-center items-center mt-5">
           <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2" @click="play = !play">
@@ -13,10 +13,15 @@
           </button>
         </div>
       </div>
-      <simulation-variables v-model="options" />
+      <div class="text-center">
+        <div>Demographie Population</div>
+        <population-chart class="chart" :chartSeries="chartSeries" />
+        <div class="q-mt-lg">Basisreproduktionszahl</div>
+        <basic-reproduction-number-chart class="chart" :chartSeries="brnSeries" />
+      </div>
     </div>
-    <div>
-      <population-chart :chartSeries="chartSeries" />
+    <div class="mb-32">
+      <simulation-variables v-model="options" />
     </div>
   </div>
 </template>
@@ -25,6 +30,7 @@
 import { defineComponent, onMounted, ref, watch } from "vue";
 import SimulationVariables from '@/components/SimulationVariables.vue';
 import PopulationChart from '@/components/PopulationChart.vue';
+import BasicReproductionNumberChart from '@/components/BasicReproductionNumberChart.vue';
 import { STATUS, STATUS_COLOR, IOptions } from '@/utils/types';
 import { Particle } from '@/utils/Particle.class';
 import P5 from 'p5';
@@ -32,7 +38,8 @@ import P5 from 'p5';
 export default defineComponent({
   components: {
     SimulationVariables,
-    PopulationChart
+    PopulationChart,
+    BasicReproductionNumberChart,
   },
   setup() {
     const play = ref<boolean>(true)
@@ -46,20 +53,27 @@ export default defineComponent({
       size: 4,
       i0: 3,
       infectionRadius: 7,
-      infectionRate: 0.04,
+      infectionRate: 0.25,
       deathRate: 0.05,
       recoveryRate: 19 * 24,
       socialDistancing: 0
     })
 
     const counter = ref<number>(0);
+    const basicReproductionNumber = ref<number>(0);
+    const brnSeries = ref<any[]>([
+      {
+        name: 'Basisreproduktionszahl',
+        data: []
+      }
+    ])
 
     const susceptibles = ref<number>(options.value.amountParticles - options.value.i0);
     const infected = ref<number>(options.value.i0);
     const recovered = ref<number>(0);
     const diseased = ref<number>(0);
 
-    const chartSeries: any = ref<any[]>([
+    const chartSeries = ref<any[]>([
       {
         name: 'Susceptibles',
         data: []
@@ -111,6 +125,7 @@ export default defineComponent({
           p5.fill(STATUS_COLOR[particles[i].status]);
           p5.ellipse(particles[i].x, particles[i].y, options.value.size, options.value.size);
         }
+
         for (let i = 0; i < particles.length; i++) {
           for (let j = 0; j < particles.length; j++) {
             if (i !== j) {
@@ -119,15 +134,31 @@ export default defineComponent({
 
               if (particleI.status === STATUS.I && particleJ.status === STATUS.S) {
                 if (particleI.intersects(particleJ, ops.infectionRadius)) {
-                  if (Math.random() < ops.infectionRate) {
-                    particleJ.status = STATUS.I;
-                    susceptibles.value--;
-                    infected.value++;
+                  particleI.contactList.push(particleJ.id);
+                } else {
+                  if (particleI.contactList.find(id => id === particleJ.id)) {
+                    if (Math.random() < ops.infectionRate) {
+                      particleJ.status = STATUS.I;
+                      infected.value++;
+                      susceptibles.value--;
+                    }
+                    particleI.contactList = particleI.contactList.filter(id => id !== particleJ.id);
+                    particleI.contacts++;
                   }
                 }
               }
             }
           }
+        }
+
+        if (infected.value) {
+          basicReproductionNumber.value = parseFloat(((
+            particles
+              .filter(p => p.status === STATUS.I)
+              .reduce((sum: number, p: Particle) => sum + p.contacts, 0) / infected.value
+            ) * ops.infectionRate * (ops.recoveryRate / 24)).toFixed(2));
+        } else {
+          basicReproductionNumber.value = 0;
         }
       }
 
@@ -151,6 +182,12 @@ export default defineComponent({
 
           if (counter.value % 24 === 0) {
             updateChart();
+            brnSeries.value = [
+              {
+                name: 'Basisreproduktionszahl',
+                data: [...brnSeries.value[0].data, basicReproductionNumber.value]
+              }
+            ]
           }
   
           counter.value++;
@@ -185,6 +222,13 @@ export default defineComponent({
         }
       ]
 
+      brnSeries.value = [
+        {
+          name: 'Basisreproduktionszahl',
+          data: []
+        }
+      ]
+
       susceptibles.value = options.value.amountParticles - options.value.i0;
       infected.value = options.value.i0;
       recovered.value = 0;
@@ -205,7 +249,9 @@ export default defineComponent({
       options,
       play,
       restartSimulation,
-      chartSeries
+      chartSeries,
+      basicReproductionNumber,
+      brnSeries
     }
   }
 });
@@ -217,7 +263,7 @@ export default defineComponent({
   height: 500px;
   outline: 2px solid white;
 }
-#chart {
+.chart {
   width: 500px;
 }
 </style>
