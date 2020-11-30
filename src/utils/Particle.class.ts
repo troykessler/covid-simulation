@@ -13,8 +13,11 @@ export class Particle {
   status: STATUS = STATUS.S;
   duration: number = 1;
 
-  contactList: number[] = [];
-  contacts: number = 0;
+  effectiveContactList: number[] = [];
+  basicContactList: number[] = [];
+
+  effectiveContacts: number = 0;
+  basicContacts: number = 0;
 
   constructor(id: number, status: STATUS, options: IOptions) {
     this.id = id;

@@ -34,20 +34,21 @@ export default defineComponent({
         enabled: false
       },
       grid: {
-        borderColor: '#a9b3b8',
+        borderColor: '#828b8f',
         strokeDashArray: 1
       },
       stroke: {
         curve: 'straight',
         width: 2
       },
-      colors: [STATUS_COLOR.S],
+      colors: [STATUS_COLOR.S, '#ffc73b'],
       xaxis: {
         labels: {
           show: false
         }
       },
       yaxis: {
+        min: 0,
         labels: {
           minWidth: 40
         }
@@ -55,14 +56,19 @@ export default defineComponent({
       annotations: {
         yaxis: [{
           y: 1,
-          borderColor: '#eb34c9'
+          borderColor: '#ffffff',
+          strokeDashArray: 0
         }]
       },
       series: [
         {
           name: 'Basisreproduktionszahl',
           data: []
-        }
+        },
+        {
+          name: 'Nettoreproduktionszahl',
+          data: []
+        },
       ]
     })
 

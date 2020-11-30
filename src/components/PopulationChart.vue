@@ -34,7 +34,7 @@ export default defineComponent({
         enabled: false
       },
       grid: {
-        borderColor: '#a9b3b8',
+        borderColor: '#828b8f',
         strokeDashArray: 1
       },
       stroke: {

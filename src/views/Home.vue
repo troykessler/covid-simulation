@@ -3,7 +3,7 @@
     <div class="grid grid-cols-2 gap-x-32 my-6">
       <div class="text-white text-right">
         <div class="inline-block">
-          <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D = {{ diseased }} | R0 = {{ basicReproductionNumber }}</div>
+          <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D = {{ diseased }} | R0 = {{ basicReproduction }}</div>
           <div id="simulation-window" class="mt-4 mx-auto block"></div>
           <div class="flex justify-center items-center mt-5">
             <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2 hover:bg-white hover:bg-opacity-10" @click="play = !play">
@@ -19,7 +19,7 @@
         <div class="inline-block text-center">
           <div class="text-white">Demographie Population</div>
           <population-chart class="chart" :chartSeries="chartSeries" />
-          <div class="text-white q-mt-lg">Basisreproduktionszahl</div>
+          <div class="text-white q-mt-lg">Reproduktionszahlen</div>
           <basic-reproduction-number-chart class="chart" :chartSeries="brnSeries" />
         </div>
       </div>
@@ -64,10 +64,15 @@ export default defineComponent({
     })
 
     const counter = ref<number>(0);
-    const basicReproductionNumber = ref<number>(0);
+    const basicReproduction = ref<number | null>(null);
+    const effectiveReproduction = ref<number | null>(null);
     const brnSeries = ref<any[]>([
       {
         name: 'Basisreproduktionszahl',
+        data: []
+      },
+      {
+        name: 'Nettoreproduktionszahl',
         data: []
       }
     ])
@@ -102,12 +107,8 @@ export default defineComponent({
       chartSeries.value[2].data = [...chartSeries.value[2].data, recovered.value];
       chartSeries.value[3].data = [...chartSeries.value[3].data, diseased.value];
 
-      brnSeries.value = [
-        {
-          name: 'Basisreproduktionszahl',
-          data: [...brnSeries.value[0].data, basicReproductionNumber.value]
-        }
-      ];
+      brnSeries.value[0].data = [...brnSeries.value[0].data, basicReproduction.value];
+      brnSeries.value[1].data = [...brnSeries.value[1].data, effectiveReproduction.value];
     }
 
     const sketch = (p5: any) => {
@@ -145,16 +146,27 @@ export default defineComponent({
 
               if (particleI.status === STATUS.I && particleJ.status === STATUS.S) {
                 if (particleI.intersects(particleJ, ops.infectionRadius)) {
-                  particleI.contactList.push(particleJ.id);
+                  particleI.effectiveContactList.push(particleJ.id);
                 } else {
-                  if (particleI.contactList.find(id => id === particleJ.id)) {
+                  if (particleI.effectiveContactList.find(id => id === particleJ.id)) {
                     if (Math.random() < ops.infectionRate) {
                       particleJ.status = STATUS.I;
                       infected.value++;
                       susceptibles.value--;
                     }
-                    particleI.contactList = particleI.contactList.filter(id => id !== particleJ.id);
-                    particleI.contacts++;
+                    particleI.effectiveContactList = particleI.effectiveContactList.filter(id => id !== particleJ.id);
+                    particleI.effectiveContacts++;
+                  }
+                }
+              }
+
+              if (particleI.status === STATUS.I) {
+                if (particleI.intersects(particleJ, ops.infectionRadius)) {
+                  particleI.basicContactList.push(particleJ.id);
+                } else {
+                  if (particleI.basicContactList.find(id => id === particleJ.id)) {
+                    particleI.basicContactList = particleI.basicContactList.filter(id => id !== particleJ.id);
+                    particleI.basicContacts++;
                   }
                 }
               }
@@ -163,15 +175,23 @@ export default defineComponent({
         }
 
         if (infected.value) {
-          const averageContacts = particles
-              .filter(p => p.status === STATUS.I)
-              .reduce(
-                (sum: number, p: Particle) => sum + (p.contacts * (ops.recoveryRate / p.duration)
-              ), 0) / infected.value;
+          const effectiveContacts = particles
+            .filter(p => p.status === STATUS.I)
+            .reduce(
+              (sum: number, p: Particle) => sum + (p.effectiveContacts * (ops.recoveryRate / p.duration)
+            ), 0) / infected.value;
+
+          const basicContacts = particles
+            .filter(p => p.status === STATUS.I)
+            .reduce(
+              (sum: number, p: Particle) => sum + (p.basicContacts * (ops.recoveryRate / p.duration)
+            ), 0) / infected.value;
   
-          basicReproductionNumber.value = parseFloat((averageContacts * ops.infectionRate).toFixed(2));
+          effectiveReproduction.value = parseFloat((effectiveContacts * ops.infectionRate).toFixed(2)) || null;
+          basicReproduction.value = parseFloat((basicContacts * ops.infectionRate).toFixed(2)) || null;
         } else {
-          basicReproductionNumber.value = 0;
+          effectiveReproduction.value = null;
+          basicReproduction.value = null;
         }
       }
 
@@ -234,7 +254,11 @@ export default defineComponent({
         {
           name: 'Basisreproduktionszahl',
           data: []
-        }
+        },
+        {
+          name: 'Nettoreproduktionszahl',
+          data: []
+        },
       ]
 
       susceptibles.value = options.value.amountParticles - options.value.i0;
@@ -258,7 +282,7 @@ export default defineComponent({
       play,
       restartSimulation,
       chartSeries,
-      basicReproductionNumber,
+      basicReproduction,
       brnSeries
     }
   }
