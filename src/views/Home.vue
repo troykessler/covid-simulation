@@ -1,23 +1,27 @@
 <template>
   <div>
-    <div class="grid grid-cols-2 m-6">
-      <div class="text-white">
-        <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D = {{ diseased }} | R0 = {{ basicReproductionNumber }}</div>
-        <div id="simulation-window" class="mt-4 mx-auto block"></div>
-        <div class="flex justify-center items-center mt-5">
-          <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2" @click="play = !play">
-            <i :class="`mdi mdi-${play ? 'pause' : 'play'} text-2xl`"></i>
-          </button>
-          <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2" @click="restartSimulation">
-            <i class="mdi mdi-replay text-2xl"></i>
-          </button>
+    <div class="grid grid-cols-2 gap-x-32 my-6">
+      <div class="text-white text-right">
+        <div class="inline-block">
+          <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D = {{ diseased }} | R0 = {{ basicReproductionNumber }}</div>
+          <div id="simulation-window" class="mt-4 mx-auto block"></div>
+          <div class="flex justify-center items-center mt-5">
+            <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2 hover:bg-white hover:bg-opacity-10" @click="play = !play">
+              <i :class="`mdi mdi-${play ? 'pause' : 'play'} text-2xl`"></i>
+            </button>
+            <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2 hover:bg-white hover:bg-opacity-10" @click="restartSimulation">
+              <i class="mdi mdi-replay text-2xl"></i>
+            </button>
+          </div>
         </div>
       </div>
-      <div class="text-center">
-        <div class="text-white">Demographie Population</div>
-        <population-chart class="chart" :chartSeries="chartSeries" />
-        <div class="text-white q-mt-lg">Basisreproduktionszahl</div>
-        <basic-reproduction-number-chart class="chart" :chartSeries="brnSeries" />
+      <div>
+        <div class="inline-block text-center">
+          <div class="text-white">Demographie Population</div>
+          <population-chart class="chart" :chartSeries="chartSeries" />
+          <div class="text-white q-mt-lg">Basisreproduktionszahl</div>
+          <basic-reproduction-number-chart class="chart" :chartSeries="brnSeries" />
+        </div>
       </div>
     </div>
     <div class="mb-32">
