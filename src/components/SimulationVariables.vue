@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="text-white">
     <div class="text-center">Startbedingungen</div>
     <div class="m-auto" style="width: 500px">
       <div>Populationsgröße</div>

@@ -19,8 +19,10 @@ export default defineComponent({
 
     const chartOptions = ref<any>({
       chart: {
+        id: 'basicReproduction',
         height: 250,
         type: 'line',
+        group: 'covid',
         zoom: {
           enabled: false
         },
@@ -44,6 +46,17 @@ export default defineComponent({
         labels: {
           show: false
         }
+      },
+      yaxis: {
+        labels: {
+          minWidth: 40
+        }
+      },
+      annotations: {
+        yaxis: [{
+          y: 1,
+          borderColor: '#eb34c9'
+        }]
       },
       series: [
         {

@@ -1,7 +1,7 @@
 <template>
-  <div class="text-white">
+  <div>
     <div class="grid grid-cols-2 m-6">
-      <div>
+      <div class="text-white">
         <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D = {{ diseased }} | R0 = {{ basicReproductionNumber }}</div>
         <div id="simulation-window" class="mt-4 mx-auto block"></div>
         <div class="flex justify-center items-center mt-5">
@@ -14,9 +14,9 @@
         </div>
       </div>
       <div class="text-center">
-        <div>Demographie Population</div>
+        <div class="text-white">Demographie Population</div>
         <population-chart class="chart" :chartSeries="chartSeries" />
-        <div class="q-mt-lg">Basisreproduktionszahl</div>
+        <div class="text-white q-mt-lg">Basisreproduktionszahl</div>
         <basic-reproduction-number-chart class="chart" :chartSeries="brnSeries" />
       </div>
     </div>
@@ -93,10 +93,17 @@ export default defineComponent({
     ])
     
     const updateChart = () => {
-      chartSeries.value[0].data = [...chartSeries.value[0].data, susceptibles.value]
-      chartSeries.value[1].data = [...chartSeries.value[1].data, infected.value]
-      chartSeries.value[2].data = [...chartSeries.value[2].data, recovered.value]
-      chartSeries.value[3].data = [...chartSeries.value[3].data, diseased.value]
+      chartSeries.value[0].data = [...chartSeries.value[0].data, susceptibles.value];
+      chartSeries.value[1].data = [...chartSeries.value[1].data, infected.value];
+      chartSeries.value[2].data = [...chartSeries.value[2].data, recovered.value];
+      chartSeries.value[3].data = [...chartSeries.value[3].data, diseased.value];
+
+      brnSeries.value = [
+        {
+          name: 'Basisreproduktionszahl',
+          data: [...brnSeries.value[0].data, basicReproductionNumber.value]
+        }
+      ];
     }
 
     const sketch = (p5: any) => {
@@ -152,11 +159,13 @@ export default defineComponent({
         }
 
         if (infected.value) {
-          basicReproductionNumber.value = parseFloat(((
-            particles
+          const averageContacts = particles
               .filter(p => p.status === STATUS.I)
-              .reduce((sum: number, p: Particle) => sum + p.contacts, 0) / infected.value
-            ) * ops.infectionRate * (ops.recoveryRate / 24)).toFixed(2));
+              .reduce(
+                (sum: number, p: Particle) => sum + (p.contacts * (ops.recoveryRate / p.duration)
+              ), 0) / infected.value;
+  
+          basicReproductionNumber.value = parseFloat((averageContacts * ops.infectionRate).toFixed(2));
         } else {
           basicReproductionNumber.value = 0;
         }
@@ -182,17 +191,12 @@ export default defineComponent({
 
           if (counter.value % 24 === 0) {
             updateChart();
-            brnSeries.value = [
-              {
-                name: 'Basisreproduktionszahl',
-                data: [...brnSeries.value[0].data, basicReproductionNumber.value]
-              }
-            ]
           }
   
           counter.value++;
 
           if (!infected.value) {
+            updateChart();
             play.value = false;
           }
         }

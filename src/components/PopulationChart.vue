@@ -19,8 +19,10 @@ export default defineComponent({
 
     const chartOptions = ref<any>({
       chart: {
+        id: 'population',
         height: 250,
         type: 'line',
+        group: 'covid',
         zoom: {
           enabled: false
         },
@@ -43,6 +45,11 @@ export default defineComponent({
       xaxis: {
         labels: {
           show: false
+        }
+      },
+      yaxis: {
+        labels: {
+          minWidth: 40
         }
       },
       series: [

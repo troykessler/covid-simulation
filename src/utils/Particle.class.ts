@@ -11,7 +11,7 @@ export class Particle {
   d: { x: number, y: number };
 
   status: STATUS = STATUS.S;
-  duration: number = 0;
+  duration: number = 1;
 
   contactList: number[] = [];
   contacts: number = 0;
