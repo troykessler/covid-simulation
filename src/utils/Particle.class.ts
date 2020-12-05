@@ -13,8 +13,7 @@ export class Particle {
   status: STATUS = STATUS.S;
   duration: number = 1;
 
-  effectiveContactList: number[] = [];
-  basicContactList: number[] = [];
+  contactList: any = {};
 
   effectiveContacts: number = 0;
   basicContacts: number = 0;

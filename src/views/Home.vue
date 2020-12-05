@@ -3,7 +3,7 @@
     <div class="grid grid-cols-2 gap-x-32 my-6">
       <div class="text-white text-right">
         <div class="inline-block">
-          <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D = {{ diseased }} | R0 = {{ basicReproduction }}</div>
+          <div class="text-center">S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D = {{ diseased }} | R0 = {{ basicReproduction || 0 }}</div>
           <div id="simulation-window" class="mt-4 mx-auto block"></div>
           <div class="flex justify-center items-center mt-5">
             <button class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2 hover:bg-white hover:bg-opacity-10" @click="play = !play">
@@ -64,8 +64,8 @@ export default defineComponent({
     })
 
     const counter = ref<number>(0);
-    const basicReproduction = ref<number | null>(null);
-    const effectiveReproduction = ref<number | null>(null);
+    const basicReproduction = ref<number | null>(0);
+    const effectiveReproduction = ref<number | null>(0);
     const brnSeries = ref<any[]>([
       {
         name: 'Basisreproduktionszahl',
@@ -144,30 +144,20 @@ export default defineComponent({
               let particleI: Particle = particles[i];
               let particleJ: Particle = particles[j];
 
-              if (particleI.status === STATUS.I && particleJ.status === STATUS.S) {
+              if (particleI.status === STATUS.I) {
                 if (particleI.intersects(particleJ, ops.infectionRadius)) {
-                  particleI.effectiveContactList.push(particleJ.id);
-                } else {
-                  if (particleI.effectiveContactList.find(id => id === particleJ.id)) {
+                  particleI.contactList = { ...particleI.contactList, [particleJ.id]: particleJ };
+                } else if (particleI.contactList[particleJ.id]) {
+                  if (particleI.contactList[particleJ.id].status === STATUS.S) {
                     if (Math.random() < ops.infectionRate) {
                       particleJ.status = STATUS.I;
                       infected.value++;
                       susceptibles.value--;
                     }
-                    particleI.effectiveContactList = particleI.effectiveContactList.filter(id => id !== particleJ.id);
                     particleI.effectiveContacts++;
                   }
-                }
-              }
-
-              if (particleI.status === STATUS.I) {
-                if (particleI.intersects(particleJ, ops.infectionRadius)) {
-                  particleI.basicContactList.push(particleJ.id);
-                } else {
-                  if (particleI.basicContactList.find(id => id === particleJ.id)) {
-                    particleI.basicContactList = particleI.basicContactList.filter(id => id !== particleJ.id);
-                    particleI.basicContacts++;
-                  }
+                  delete particleI.contactList[particleJ.id];
+                  particleI.basicContacts++;
                 }
               }
             }
@@ -187,8 +177,8 @@ export default defineComponent({
               (sum: number, p: Particle) => sum + (p.basicContacts * (ops.recoveryRate / p.duration)
             ), 0) / infected.value;
   
-          effectiveReproduction.value = parseFloat((effectiveContacts * ops.infectionRate).toFixed(2)) || null;
-          basicReproduction.value = parseFloat((basicContacts * ops.infectionRate).toFixed(2)) || null;
+          effectiveReproduction.value = parseFloat((effectiveContacts * ops.infectionRate).toFixed(2));
+          basicReproduction.value = parseFloat((basicContacts * ops.infectionRate).toFixed(2));
         } else {
           effectiveReproduction.value = null;
           basicReproduction.value = null;
