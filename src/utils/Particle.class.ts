@@ -26,7 +26,7 @@ export class Particle {
     this.x = Math.random() * options.width;
     this.y = Math.random() * options.height;
     this.speed = options.speed + Math.random() * 2 * options.speed
-    this.directions = Math.floor(Math.random() * 360)
+    this.directions = (2 * Math.PI * Math.random()) - Math.PI;
     
     this.d = {
       x: Math.cos(this.directions) * this.speed,

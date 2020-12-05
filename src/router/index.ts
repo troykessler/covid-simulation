@@ -1,11 +1,17 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
-import Home from '../views/Home.vue'
+import Base from '../views/Base.vue'
+import CentralLocation from '../views/CentralLocation.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    name: 'Home',
-    component: Home
+    name: 'Base',
+    component: Base
+  },
+  {
+    path: '/central',
+    name: 'CentralLocation',
+    component: CentralLocation
   }
 ]
 
@@ -14,4 +20,4 @@ const router = createRouter({
   routes
 })
 
-export default router
+export default router;
