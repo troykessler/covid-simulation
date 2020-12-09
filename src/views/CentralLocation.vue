@@ -36,6 +36,20 @@
         </div>
       </div>
     </div>
+    <div class="text-center">
+      <button
+        class="mr-2 btn-outline-blue focus:outline-none border border-blue-700 hover:bg-blue-700 text-blue-700 hover:text-white font-normal py-2 px-4 rounded"
+        @click="$router.replace('/')"
+      >
+        Basismodell
+      </button>
+      <button
+        class="ml-2btn-outline-blue focus:outline-none border border-blue-700 hover:bg-blue-700 text-blue-700 hover:text-white font-normal py-2 px-4 rounded"
+        @click="$router.replace('/central')"
+      >
+        Hotspots
+      </button>
+    </div>
     <div class="mb-32">
       <simulation-variables v-model="options" />
     </div>
@@ -68,7 +82,7 @@ export default defineComponent({
       speed: 0.5,
       size: 4,
       i0: 3,
-      infectionRadius: 7,
+      infectionRadius: 3,
       infectionRate: 0.25,
       deathRate: 0.05,
       recoveryRate: 19 * 24,
@@ -207,7 +221,8 @@ export default defineComponent({
               location.particles.unshift(particlesInRadius[particleIndex]);
               particlesInRadius[particleIndex].travelTo(
                 location.center.x,
-                location.center.y
+                location.center.y,
+                0
               );
             }
           } else if (Math.random() < options.value.centralExchangeRate!) {
@@ -227,7 +242,7 @@ export default defineComponent({
                 Math.sin(ang) *
                   options.value.centralLocationRadius! *
                   Math.random();
-              particle?.travelTo(x, y);
+              particle?.travelTo(x, y, options.value.speed);
             }
           }
         });
@@ -301,6 +316,8 @@ export default defineComponent({
         p5.createCanvas(options.value.width, options.value.height);
         particles = [];
 
+        centralLocations.value.forEach((location) => (location.particles = []));
+
         for (
           let i = 0;
           i < options.value.amountParticles - options.value.i0;
@@ -328,10 +345,6 @@ export default defineComponent({
             p5.fill("rgba(0,0,0,0)");
             p5.stroke("white");
             p5.circle(location.center.x, location.center.y, 30, 30);
-
-            p5.fill("rgba(0,0,0,0)");
-            p5.stroke("rgba(255,255,255,0.1)");
-            p5.circle(location.center.x, location.center.y, 200, 200);
           });
 
           loop();

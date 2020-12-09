@@ -20,6 +20,7 @@ export class Particle {
 
   travelling: boolean = false;
   travelCounter: number = 40;
+  postTravelSpeed: number = 0;
 
   constructor(id: number, status: STATUS, options: IOptions) {
     this.id = id;
@@ -70,6 +71,14 @@ export class Particle {
       }
     } else {
       this.travelling = false;
+      this.travelCounter = 40;
+      this.speed = this.postTravelSpeed + Math.random() * 2 * this.postTravelSpeed
+      this.directions = (2 * Math.PI * Math.random()) - Math.PI;
+      
+      this.d = {
+        x: Math.cos(this.directions) * this.speed,
+        y: Math.sin(this.directions) * this.speed
+      }
     }
 
     if (this.status === STATUS.I) {
@@ -90,16 +99,17 @@ export class Particle {
     return Math.sqrt(Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2))
   }
 
-  travelTo(x: number, y: number): void {
+  travelTo(x: number, y: number, speed: number): void {
     const directions = Math.atan2(y - this.y, x - this.x);
-    const speed = 5;
+    const travelSpeed = 4;
 
     this.d = {
-      x: Math.cos(directions) * speed,
-      y: Math.sin(directions) * speed,
+      x: Math.cos(directions) * travelSpeed,
+      y: Math.sin(directions) * travelSpeed,
     }
 
     this.travelCounter = (x - this.x) / this.d.x;
     this.travelling = true;
+    this.postTravelSpeed = speed;
   }
 }

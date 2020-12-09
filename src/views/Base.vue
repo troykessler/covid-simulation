@@ -36,6 +36,20 @@
         </div>
       </div>
     </div>
+    <div class="text-center">
+      <button
+        class="mr-2 btn-outline-blue focus:outline-none border border-blue-700 hover:bg-blue-700 text-blue-700 hover:text-white font-normal py-2 px-4 rounded"
+        @click="$router.replace('/')"
+      >
+        Basismodell
+      </button>
+      <button
+        class="ml-2btn-outline-blue focus:outline-none border border-blue-700 hover:bg-blue-700 text-blue-700 hover:text-white font-normal py-2 px-4 rounded"
+        @click="$router.replace('/central')"
+      >
+        Hotspots
+      </button>
+    </div>
     <div class="mb-32">
       <simulation-variables v-model="options" />
     </div>
