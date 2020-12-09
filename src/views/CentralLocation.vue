@@ -74,6 +74,8 @@ export default defineComponent({
       recoveryRate: 19 * 24,
       socialDistancing: 0,
       centralParticleAmount: 10,
+      centralExchangeRate: 0.2,
+      centralLocationRadius: 100,
     });
 
     const counter = ref<number>(0);
@@ -116,19 +118,43 @@ export default defineComponent({
       },
     ]);
 
-    const centralLocationParticles = ref<number[]>([]);
-
-    const generateCentralLocationParticles = () => {
-      const centralParticles = new Set<number>();
-
-      while (centralParticles.size !== options.value.centralParticleAmount) {
-        centralParticles.add(
-          Math.floor(Math.random() * options.value.amountParticles)
-        );
-      }
-
-      centralLocationParticles.value = Array.from(centralParticles);
-    };
+    const centralLocations = ref<any[]>([
+      {
+        center: {
+          x: 125,
+          y: 125,
+        },
+        particles: [],
+      },
+      {
+        center: {
+          x: 375,
+          y: 125,
+        },
+        particles: [],
+      },
+      {
+        center: {
+          x: 250,
+          y: 250,
+        },
+        particles: [],
+      },
+      {
+        center: {
+          x: 125,
+          y: 375,
+        },
+        particles: [],
+      },
+      {
+        center: {
+          x: 375,
+          y: 375,
+        },
+        particles: [],
+      },
+    ]);
 
     const updateChart = () => {
       chartSeries.value[0].data = [
@@ -164,22 +190,47 @@ export default defineComponent({
       function loop() {
         const ops: IOptions = options.value;
 
-        if (counter.value !== 0) {
-          if ((counter.value % 180) - 90 === 0) {
-            centralLocationParticles.value.forEach((i) => {
-              particles[i].travelTo(250, 250);
-            });
-          }
+        centralLocations.value.forEach((location) => {
+          if (
+            location.particles.length < options.value.centralParticleAmount!
+          ) {
+            const particlesInRadius = particles.filter(
+              (particle) =>
+                particle.distance(location.center.x, location.center.y) <
+                options.value.centralLocationRadius!
+            );
 
-          if (counter.value % 180 === 0) {
-            centralLocationParticles.value.forEach((i) => {
-              const x = Math.random() * options.value.width;
-              const y = Math.random() * options.value.height;
-
-              particles[i].travelTo(x, y);
-            });
+            if (particlesInRadius.length) {
+              const particleIndex = Math.floor(
+                Math.random() * particlesInRadius.length
+              );
+              location.particles.unshift(particlesInRadius[particleIndex]);
+              particlesInRadius[particleIndex].travelTo(
+                location.center.x,
+                location.center.y
+              );
+            }
+          } else if (Math.random() < options.value.centralExchangeRate!) {
+            if (
+              !location.particles[options.value.centralParticleAmount! - 1]
+                .travelling
+            ) {
+              const particle = location.particles.pop();
+              const ang = 2 * Math.PI * Math.random() - Math.PI;
+              const x =
+                location.center.x +
+                Math.cos(ang) *
+                  options.value.centralLocationRadius! *
+                  Math.random();
+              const y =
+                location.center.y +
+                Math.sin(ang) *
+                  options.value.centralLocationRadius! *
+                  Math.random();
+              particle?.travelTo(x, y);
+            }
           }
-        }
+        });
 
         for (let i = 0; i < particles.length; i++) {
           const particle = particles[i];
@@ -267,33 +318,21 @@ export default defineComponent({
             )
           );
         }
-
-        generateCentralLocationParticles();
       };
 
       p5.draw = () => {
         if (play.value) {
           p5.background(33, 33, 33);
 
-          p5.fill(33, 33, 33);
-          p5.stroke("white");
-          p5.circle(125, 125, 40, 40);
+          centralLocations.value.forEach((location) => {
+            p5.fill("rgba(0,0,0,0)");
+            p5.stroke("white");
+            p5.circle(location.center.x, location.center.y, 30, 30);
 
-          p5.fill(33, 33, 33);
-          p5.stroke("white");
-          p5.circle(375, 125, 40, 40);
-
-          p5.fill(33, 33, 33);
-          p5.stroke("white");
-          p5.circle(250, 250, 40, 40);
-
-          p5.fill(33, 33, 33);
-          p5.stroke("white");
-          p5.circle(125, 375, 40, 40);
-
-          p5.fill(33, 33, 33);
-          p5.stroke("white");
-          p5.circle(375, 375, 40, 40);
+            p5.fill("rgba(0,0,0,0)");
+            p5.stroke("rgba(255,255,255,0.1)");
+            p5.circle(location.center.x, location.center.y, 200, 200);
+          });
 
           loop();
 

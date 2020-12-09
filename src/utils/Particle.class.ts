@@ -19,7 +19,7 @@ export class Particle {
   basicContacts: number = 0;
 
   travelling: boolean = false;
-  travelCounter: number = 60;
+  travelCounter: number = 40;
 
   constructor(id: number, status: STATUS, options: IOptions) {
     this.id = id;
@@ -92,7 +92,7 @@ export class Particle {
 
   travelTo(x: number, y: number): void {
     const directions = Math.atan2(y - this.y, x - this.x);
-    const speed = this.distance(x, y) / 60;
+    const speed = 5;
 
     this.d = {
       x: Math.cos(directions) * speed,

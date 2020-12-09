@@ -24,5 +24,8 @@ export interface IOptions {
   deathRate: number;
   recoveryRate: number;
   socialDistancing: number;
-  centralParticleAmount: number;
+
+  centralParticleAmount?: number;
+  centralExchangeRate?: number;
+  centralLocationRadius?: number;
 }

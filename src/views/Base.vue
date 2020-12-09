@@ -73,7 +73,6 @@ export default defineComponent({
       deathRate: 0.05,
       recoveryRate: 19 * 24,
       socialDistancing: 0,
-      centralParticleAmount: 0,
     });
 
     const counter = ref<number>(0);
