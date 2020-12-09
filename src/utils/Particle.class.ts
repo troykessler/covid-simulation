@@ -18,6 +18,9 @@ export class Particle {
   effectiveContacts: number = 0;
   basicContacts: number = 0;
 
+  travelling: boolean = false;
+  travelCounter: number = 60;
+
   constructor(id: number, status: STATUS, options: IOptions) {
     this.id = id;
 
@@ -35,35 +38,41 @@ export class Particle {
   }
 
   move(width: number, height: number, particles: Particle[], socialDistancing: number) {
-    if (this.x >= width || this.x <= 0) {
-      this.d.x *= -1;
-    }
-
-    if (this.y >= height || this.y <= 0) {
-      this.d.y *= -1;
-    }
-    
-    this.x > width ? this.x = width : this.x;
-    this.y > height ? this.y = height : this.y;
-    this.x < 0 ? this.x = 0 : this.x;
-    this.y < 0 ? this.y = 0 : this.y;
-
-    this.x += this.d.x;
-    this.y += this.d.y;
-
-    if (this.status !== STATUS.D) {
-      for (let i = 0; i < particles.length; i++) {
-        const ang = Math.atan2(this.y - particles[i].y, this.x - particles[i].x);
-        const dist = Math.sqrt(Math.pow(particles[i].x - this.x, 2) + Math.pow(particles[i].y - this.y, 2));
-        const force = this.mapRange(socialDistancing, 0, 1, 0, 0.05) * dist;
-
-        if (dist < 25) {
-          this.x += force * Math.cos(ang);
-          this.y += force * Math.sin(ang);
+    if (this.travelCounter > 0) {
+      if (this.x >= width || this.x <= 0) {
+        this.d.x *= -1;
+      }
+  
+      if (this.y >= height || this.y <= 0) {
+        this.d.y *= -1;
+      }
+      
+      this.x > width ? this.x = width : this.x;
+      this.y > height ? this.y = height : this.y;
+      this.x < 0 ? this.x = 0 : this.x;
+      this.y < 0 ? this.y = 0 : this.y;
+  
+      this.x += this.d.x;
+      this.y += this.d.y;
+  
+      if (this.status !== STATUS.D) {
+        for (let i = 0; i < particles.length; i++) {
+          const ang = Math.atan2(this.y - particles[i].y, this.x - particles[i].x);
+          const dist = Math.sqrt(Math.pow(particles[i].x - this.x, 2) + Math.pow(particles[i].y - this.y, 2));
+          const force = this.mapRange(socialDistancing, 0, 1, 0, 0.05) * dist;
+  
+          if (dist < 25) {
+            this.x += force * Math.cos(ang);
+            this.y += force * Math.sin(ang);
+          }
         }
       }
-    }
 
+      if (this.travelling) {
+        this.travelCounter--;
+      }
+    }
+    
     if (this.status === STATUS.I) {
       this.duration++;
     }
@@ -75,5 +84,9 @@ export class Particle {
 
   intersects(particle: Particle, radius: number) {
     return Math.sqrt(Math.pow(particle.x - this.x, 2) + Math.pow(particle.y - this.y, 2)) < radius;
+  }
+
+  distance(x: number, y: number): number {
+    return Math.sqrt(Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2))
   }
 }

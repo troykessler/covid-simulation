@@ -122,16 +122,34 @@ export default defineComponent({
           const particle = particles[i];
 
           if ((230 < particle.x && particle.x < 270) && (230 < particle.y && particle.y < 270)) {
-            if (Math.random() < 0.5) {
-              particle.d = { x: 0, y: 0 };
+            if (Math.random() < 0.01) {
+              const newX = Math.random() * 500;
+              const newY = Math.random() * 500;
+
+              const directions = Math.atan2(newY - particle.y, newX - particle.x);
+
+              const speed = particle.distance(0, 0) / 60;
+
+              particle.d = {
+                x: Math.cos(directions) * speed,
+                y: Math.sin(directions) * speed
+              }
+
+              particle.travelCounter = (newX - particle.x) / particle.d.x;
+              particle.travelling = true;
             }
-          } else if (Math.random() < 0.001) {
+          } else if (Math.random() < 0.0005) {
             const directions = Math.atan2(250 - particle.y, 250 - particle.x);
-            const speed = 5;
+            
+            const speed = particle.distance(0, 0) / 60;
+
             particle.d = {
               x: Math.cos(directions) * speed,
               y: Math.sin(directions) * speed
             }
+
+            particle.travelCounter = (250 - particle.x) / particle.d.x;
+            particle.travelling = true;
           }
 
           particle.move(ops.width, ops.height, particles, ops.socialDistancing);
