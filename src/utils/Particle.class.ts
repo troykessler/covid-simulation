@@ -39,6 +39,7 @@ export class Particle {
 
   move(width: number, height: number, particles: Particle[], socialDistancing: number) {
     if (this.travelCounter > 0) {
+
       if (this.x >= width || this.x <= 0) {
         this.d.x *= -1;
       }
@@ -67,26 +68,38 @@ export class Particle {
           }
         }
       }
-
-      if (this.travelling) {
-        this.travelCounter--;
-      }
+    } else {
+      this.travelling = false;
     }
-    
+
     if (this.status === STATUS.I) {
       this.duration++;
     }
+
+    if (this.travelling) {
+      this.travelCounter--;
+    }
+  
   }
 
   mapRange(value: number, low1: number, high1: number, low2: number, high2: number) {
     return low2 + (high2 - low2) * (value - low1) / (high1 - low1);
   }
 
-  intersects(particle: Particle, radius: number) {
-    return Math.sqrt(Math.pow(particle.x - this.x, 2) + Math.pow(particle.y - this.y, 2)) < radius;
-  }
-
   distance(x: number, y: number): number {
     return Math.sqrt(Math.pow(x - this.x, 2) + Math.pow(y - this.y, 2))
+  }
+
+  travelTo(x: number, y: number): void {
+    const directions = Math.atan2(y - this.y, x - this.x);
+    const speed = this.distance(x, y) / 60;
+
+    this.d = {
+      x: Math.cos(directions) * speed,
+      y: Math.sin(directions) * speed,
+    }
+
+    this.travelCounter = (x - this.x) / this.d.x;
+    this.travelling = true;
   }
 }
