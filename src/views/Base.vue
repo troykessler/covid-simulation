@@ -51,14 +51,14 @@
       </button>
     </div>
     <div class="mb-32">
-      <simulation-variables v-model="options" />
+      <base-simulation-variables v-model="options" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from "vue";
-import SimulationVariables from "@/components/SimulationVariables.vue";
+import BaseSimulationVariables from "@/components/BaseSimulationVariables.vue";
 import PopulationChart from "@/components/PopulationChart.vue";
 import BasicReproductionNumberChart from "@/components/BasicReproductionNumberChart.vue";
 import { STATUS, STATUS_COLOR, IOptions } from "@/utils/types";
@@ -67,7 +67,7 @@ import P5 from "p5";
 
 export default defineComponent({
   components: {
-    SimulationVariables,
+    BaseSimulationVariables,
     PopulationChart,
     BasicReproductionNumberChart,
   },

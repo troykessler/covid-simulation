@@ -51,14 +51,16 @@
       </button>
     </div>
     <div class="mb-32">
-      <simulation-variables v-model="options" />
+      <base-simulation-variables v-model="options" />
+      <central-simulation-variables v-model="options" />
     </div>
   </div>
 </template>
 
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from "vue";
-import SimulationVariables from "@/components/SimulationVariables.vue";
+import BaseSimulationVariables from "@/components/BaseSimulationVariables.vue";
+import CentralSimulationVariables from "@/components/CentralSimulationVariables.vue";
 import PopulationChart from "@/components/PopulationChart.vue";
 import BasicReproductionNumberChart from "@/components/BasicReproductionNumberChart.vue";
 import { STATUS, STATUS_COLOR, IOptions } from "@/utils/types";
@@ -67,7 +69,8 @@ import P5 from "p5";
 
 export default defineComponent({
   components: {
-    SimulationVariables,
+    BaseSimulationVariables,
+    CentralSimulationVariables,
     PopulationChart,
     BasicReproductionNumberChart,
   },
@@ -88,7 +91,7 @@ export default defineComponent({
       recoveryRate: 19 * 24,
       socialDistancing: 0,
       centralParticleAmount: 10,
-      centralExchangeRate: 0.2,
+      centralExchangeRate: 0.1,
       centralLocationRadius: 100,
     });
 
