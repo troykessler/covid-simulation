@@ -44,6 +44,14 @@ export class Particle {
       if (this.x >= width || this.x <= 0) {
         this.d.x *= -1;
       }
+
+      if (true) {
+        this.xBarrier(166.66, 10);
+        this.xBarrier(333.33, 10);
+        
+        this.yBarrier(166.66, 10);
+        this.yBarrier(333.33, 10);
+      }
   
       if (this.y >= height || this.y <= 0) {
         this.d.y *= -1;
@@ -111,5 +119,17 @@ export class Particle {
     this.travelCounter = (x - this.x) / this.d.x;
     this.travelling = true;
     this.postTravelSpeed = speed;
+  }
+
+  xBarrier(x: number, thickness: number): void {
+    if ((this.x <= x && this.x + this.d.x >= x) || (this.x >= x && this.x + this.d.x <= x)) {
+      this.d.x *= -1;
+    }
+  }
+
+  yBarrier(y: number, thickness: number): void {
+    if ((this.y <= y && this.y + this.d.y >= y) || (this.y >= y && this.y + this.d.y <= y)) {
+      this.d.y *= -1;
+    }
   }
 }

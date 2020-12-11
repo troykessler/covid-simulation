@@ -195,6 +195,8 @@ export default defineComponent({
           }
 
           p5.fill(STATUS_COLOR[particles[i].status]);
+          p5.stroke(0, 0, 0);
+          p5.strokeWeight(1);
           p5.ellipse(
             particles[i].x,
             particles[i].y,
@@ -292,6 +294,23 @@ export default defineComponent({
       p5.draw = () => {
         if (play.value) {
           p5.background(33, 33, 33);
+
+          p5.stroke("grey");
+          p5.strokeWeight(1);
+          p5.line(166.66, 0, 166.66, 500);
+
+          p5.stroke("grey");
+          p5.strokeWeight(1);
+          p5.line(333.33, 0, 333.33, 500);
+
+          p5.stroke("grey");
+          p5.strokeWeight(1);
+          p5.line(0, 166.66, 500, 166.66);
+
+          p5.stroke("grey");
+          p5.strokeWeight(1);
+          p5.line(0, 333.33, 500, 333.33);
+
           loop();
 
           if (counter.value % 24 === 0) {
