@@ -58,6 +58,7 @@
     </div>
     <div class="mb-32">
       <base-simulation-variables v-model="options" />
+      <community-simulation-variables v-model="options" />
     </div>
   </div>
 </template>
@@ -65,6 +66,7 @@
 <script lang="ts">
 import { defineComponent, onMounted, ref, watch } from "vue";
 import BaseSimulationVariables from "@/components/BaseSimulationVariables.vue";
+import CommunitySimulationVariables from "@/components/CommunitySimulationVariables.vue";
 import PopulationChart from "@/components/PopulationChart.vue";
 import BasicReproductionNumberChart from "@/components/BasicReproductionNumberChart.vue";
 import { STATUS, STATUS_COLOR, IOptions } from "@/utils/types";
@@ -76,6 +78,7 @@ export default defineComponent({
     BaseSimulationVariables,
     PopulationChart,
     BasicReproductionNumberChart,
+    CommunitySimulationVariables
   },
   setup() {
     const play = ref<boolean>(true);
@@ -93,6 +96,9 @@ export default defineComponent({
       deathRate: 0.05,
       recoveryRate: 19 * 24,
       socialDistancing: 0,
+      communities: true,
+      border: 0.98,
+      travelsPerDay: 3
     });
 
     const counter = ref<number>(0);
@@ -169,13 +175,16 @@ export default defineComponent({
       function loop() {
         const ops: IOptions = options.value;
 
+        if (counter.value % 24 === 0) {
+          for (let i = 0; i < options.value.travelsPerDay!; i++) {
+            const x = Math.random() * options.value.width;
+            const y = Math.random() * options.value.height;
+            particles[Math.floor(Math.random() * options.value.amountParticles)].travelTo(x, y, options.value.speed);
+          }
+        }
+
         for (let i = 0; i < particles.length; i++) {
-          particles[i].move(
-            ops.width,
-            ops.height,
-            particles,
-            ops.socialDistancing
-          );
+          particles[i].move(ops, particles);
 
           if (
             particles[i].status === STATUS.I &&
@@ -222,7 +231,7 @@ export default defineComponent({
                   };
                 } else if (particleI.contactList[particleJ.id]) {
                   if (particleI.contactList[particleJ.id].status === STATUS.S) {
-                    if (Math.random() < ops.infectionRate) {
+                    if (particleI.sector === particleJ.sector && Math.random() < ops.infectionRate) {
                       particleJ.status = STATUS.I;
                       infected.value++;
                       susceptibles.value--;
@@ -295,19 +304,19 @@ export default defineComponent({
         if (play.value) {
           p5.background(33, 33, 33);
 
-          p5.stroke("grey");
+          p5.stroke("white");
           p5.strokeWeight(1);
           p5.line(166.66, 0, 166.66, 500);
 
-          p5.stroke("grey");
+          p5.stroke("white");
           p5.strokeWeight(1);
           p5.line(333.33, 0, 333.33, 500);
 
-          p5.stroke("grey");
+          p5.stroke("white");
           p5.strokeWeight(1);
           p5.line(0, 166.66, 500, 166.66);
 
-          p5.stroke("grey");
+          p5.stroke("white");
           p5.strokeWeight(1);
           p5.line(0, 333.33, 500, 333.33);
 

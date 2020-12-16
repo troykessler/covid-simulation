@@ -170,12 +170,7 @@ export default defineComponent({
         const ops: IOptions = options.value;
 
         for (let i = 0; i < particles.length; i++) {
-          particles[i].move(
-            ops.width,
-            ops.height,
-            particles,
-            ops.socialDistancing
-          );
+          particles[i].move(ops, particles);
 
           if (
             particles[i].status === STATUS.I &&

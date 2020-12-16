@@ -22,6 +22,8 @@ export class Particle {
   travelCounter: number = 40;
   postTravelSpeed: number = 0;
 
+  sector: number = 0;
+
   constructor(id: number, status: STATUS, options: IOptions) {
     this.id = id;
 
@@ -38,27 +40,29 @@ export class Particle {
     }
   }
 
-  move(width: number, height: number, particles: Particle[], socialDistancing: number) {
+  move(ops: IOptions, particles: Particle[]) {
     if (this.travelCounter > 0) {
 
-      if (this.x >= width || this.x <= 0) {
+      if (this.x >= ops.width || this.x <= 0) {
         this.d.x *= -1;
       }
 
-      if (true) {
-        this.xBarrier(166.66, 10);
-        this.xBarrier(333.33, 10);
+      if (ops.communities) {
+        this.calcSectors();
+
+        this.xBarrier(166.66, ops.border);
+        this.xBarrier(333.33, ops.border);
         
-        this.yBarrier(166.66, 10);
-        this.yBarrier(333.33, 10);
+        this.yBarrier(166.66, ops.border);
+        this.yBarrier(333.33, ops.border);
       }
   
-      if (this.y >= height || this.y <= 0) {
+      if (this.y >= ops.height || this.y <= 0) {
         this.d.y *= -1;
       }
       
-      this.x > width ? this.x = width : this.x;
-      this.y > height ? this.y = height : this.y;
+      this.x > ops.width ? this.x = ops.width : this.x;
+      this.y > ops.height ? this.y = ops.height : this.y;
       this.x < 0 ? this.x = 0 : this.x;
       this.y < 0 ? this.y = 0 : this.y;
   
@@ -69,7 +73,7 @@ export class Particle {
         for (let i = 0; i < particles.length; i++) {
           const ang = Math.atan2(this.y - particles[i].y, this.x - particles[i].x);
           const dist = Math.sqrt(Math.pow(particles[i].x - this.x, 2) + Math.pow(particles[i].y - this.y, 2));
-          const force = this.mapRange(socialDistancing, 0, 1, 0, 0.05) * dist;
+          const force = this.mapRange(ops.socialDistancing, 0, 1, 0, 0.05) * dist;
   
           if (dist < 25) {
             this.x += force * Math.cos(ang);
@@ -121,15 +125,47 @@ export class Particle {
     this.postTravelSpeed = speed;
   }
 
-  xBarrier(x: number, thickness: number): void {
+  xBarrier(x: number, border: number | undefined): void {
     if ((this.x <= x && this.x + this.d.x >= x) || (this.x >= x && this.x + this.d.x <= x)) {
-      this.d.x *= -1;
+      if (!this.travelling && Math.random() < (border || 1)) {
+        this.d.x *= -1;
+      }
     }
   }
 
-  yBarrier(y: number, thickness: number): void {
+  yBarrier(y: number, border: number | undefined): void {
     if ((this.y <= y && this.y + this.d.y >= y) || (this.y >= y && this.y + this.d.y <= y)) {
-      this.d.y *= -1;
+      if (!this.travelling && Math.random() < (border || 1)) {
+        this.d.y *= -1;
+      }
+    }
+  }
+
+  calcSectors() {
+    if (this.x <= 166.66) {
+      if (this.y <= 166.66) {
+        this.sector = 0;
+      } else if (this.y <= 333.33) {
+        this.sector = 1;
+      } else {
+        this.sector = 2;
+      }
+    } else if (this.x <= 333.33) {
+      if (this.y <= 166.66) {
+        this.sector = 3;
+      } else if (this.y <= 333.33) {
+        this.sector = 4;
+      } else {
+        this.sector = 5;
+      }
+    } else {
+      if (this.y <= 166.66) {
+        this.sector = 6;
+      } else if (this.y <= 333.33) {
+        this.sector = 7;
+      } else {
+        this.sector = 8;
+      }
     }
   }
 }

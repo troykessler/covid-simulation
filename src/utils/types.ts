@@ -28,4 +28,8 @@ export interface IOptions {
   centralParticleAmount?: number;
   centralExchangeRate?: number;
   centralLocationRadius?: number;
+
+  communities?: boolean;
+  border?: number;
+  travelsPerDay?: number;
 }

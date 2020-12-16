@@ -259,7 +259,7 @@ export default defineComponent({
         for (let i = 0; i < particles.length; i++) {
           const particle = particles[i];
 
-          particle.move(ops.width, ops.height, particles, ops.socialDistancing);
+          particles[i].move(ops, particles);
 
           if (
             particle.status === STATUS.I &&
