@@ -3,6 +3,18 @@
     <div class="font-bold">Community Variablen</div>
     <div class="mt-8 grid grid-cols-2 gap-x-24 gap-y-6">
       <div>
+        <div>Communities</div>
+        <vue-slider
+          class="mt-1"
+          :drag-on-click="true"
+          :min="1"
+          :max="5"
+          :interval="1"
+          :tooltip-formatter="communityFormatter"
+          v-model="modelValue.communities"
+        />
+      </div>
+      <div>
         <div>Grenzdichte</div>
         <vue-slider
           class="mt-1"
@@ -40,6 +52,13 @@ export default defineComponent({
     modelValue: {
       type: Object,
       default: {}
+    }
+  },
+  setup(props) {
+    const communityFormatter = () => `${Math.pow(props.modelValue.communities, 2)}`;
+
+    return {
+      communityFormatter
     }
   }
 })

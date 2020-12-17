@@ -1,3 +1,5 @@
+import { Particle } from "./Particle.class";
+
 export enum STATUS {
   S = 'S',
   I = 'I',
@@ -10,6 +12,11 @@ export enum STATUS_COLOR {
   I = '#c93030',
   R = '#689c6b',
   D = '#ffffff'
+}
+
+interface CentralLocation {
+  center: { x: number, y: number };
+  particles: Particle[];
 }
 
 export interface IOptions {
@@ -25,11 +32,12 @@ export interface IOptions {
   recoveryRate: number;
   socialDistancing: number;
 
+  centralLocations?: CentralLocation[];
   centralParticleAmount?: number;
   centralExchangeRate?: number;
   centralLocationRadius?: number;
 
-  communities?: boolean;
+  communities?: number;
   border?: number;
   travelsPerDay?: number;
 }

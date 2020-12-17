@@ -27,11 +27,11 @@
       <div>
         <div class="inline-block text-center">
           <div class="text-white">Demographie Population</div>
-          <population-chart class="chart" :chartSeries="chartSeries" />
+          <population-chart class="chart" :chartSeries="dataSeries" />
           <div class="text-white q-mt-lg">Reproduktionszahlen</div>
           <basic-reproduction-number-chart
             class="chart"
-            :chartSeries="brnSeries"
+            :chartSeries="reproductionSeries"
           />
         </div>
       </div>
@@ -63,13 +63,12 @@
 </template>
 
 <script lang="ts">
-import { defineComponent, onMounted, ref, watch } from "vue";
+import { defineComponent, ref } from "vue";
 import BaseSimulationVariables from "@/components/BaseSimulationVariables.vue";
 import PopulationChart from "@/components/PopulationChart.vue";
 import BasicReproductionNumberChart from "@/components/BasicReproductionNumberChart.vue";
-import { STATUS, STATUS_COLOR, IOptions } from "@/utils/types";
-import { Particle } from "@/utils/Particle.class";
-import P5 from "p5";
+import { IOptions } from "@/utils/types";
+import { useSimulation } from '@/hooks/useSimulation';
 
 export default defineComponent({
   components: {
@@ -78,9 +77,6 @@ export default defineComponent({
     BasicReproductionNumberChart,
   },
   setup() {
-    const play = ref<boolean>(true);
-    const p5sketch = ref<any>(null);
-
     const options = ref<IOptions>({
       width: 500,
       height: 500,
@@ -95,271 +91,9 @@ export default defineComponent({
       socialDistancing: 0,
     });
 
-    const counter = ref<number>(0);
-    const basicReproduction = ref<number | null>(0);
-    const effectiveReproduction = ref<number | null>(0);
-    const brnSeries = ref<any[]>([
-      {
-        name: "Basisreproduktionszahl",
-        data: [],
-      },
-      {
-        name: "Nettoreproduktionszahl",
-        data: [],
-      },
-    ]);
-
-    const susceptibles = ref<number>(
-      options.value.amountParticles - options.value.i0
-    );
-    const infected = ref<number>(options.value.i0);
-    const recovered = ref<number>(0);
-    const diseased = ref<number>(0);
-
-    const chartSeries = ref<any[]>([
-      {
-        name: "Susceptibles",
-        data: [],
-      },
-      {
-        name: "Infected",
-        data: [],
-      },
-      {
-        name: "Recovered",
-        data: [],
-      },
-      {
-        name: "Diseased",
-        data: [],
-      },
-    ]);
-
-    const updateChart = () => {
-      chartSeries.value[0].data = [
-        ...chartSeries.value[0].data,
-        susceptibles.value,
-      ];
-      chartSeries.value[1].data = [
-        ...chartSeries.value[1].data,
-        infected.value,
-      ];
-      chartSeries.value[2].data = [
-        ...chartSeries.value[2].data,
-        recovered.value,
-      ];
-      chartSeries.value[3].data = [
-        ...chartSeries.value[3].data,
-        diseased.value,
-      ];
-
-      brnSeries.value[0].data = [
-        ...brnSeries.value[0].data,
-        basicReproduction.value,
-      ];
-      brnSeries.value[1].data = [
-        ...brnSeries.value[1].data,
-        effectiveReproduction.value,
-      ];
-    };
-
-    const sketch = (p5: any) => {
-      let particles: Particle[] = [];
-
-      function loop() {
-        const ops: IOptions = options.value;
-
-        for (let i = 0; i < particles.length; i++) {
-          particles[i].move(ops, particles);
-
-          if (
-            particles[i].status === STATUS.I &&
-            particles[i].duration > ops.recoveryRate
-          ) {
-            if (Math.random() < ops.deathRate) {
-              particles[i].status = STATUS.D;
-              particles[i].d.x = 0;
-              particles[i].d.y = 0;
-              infected.value--;
-              diseased.value++;
-            } else {
-              particles[i].status = STATUS.R;
-              infected.value--;
-              recovered.value++;
-            }
-          }
-
-          p5.fill(STATUS_COLOR[particles[i].status]);
-          p5.ellipse(
-            particles[i].x,
-            particles[i].y,
-            options.value.size,
-            options.value.size
-          );
-        }
-
-        for (let i = 0; i < particles.length; i++) {
-          for (let j = 0; j < particles.length; j++) {
-            if (i !== j) {
-              let particleI: Particle = particles[i];
-              let particleJ: Particle = particles[j];
-
-              if (particleI.status === STATUS.I) {
-                if (
-                  particleI.distance(particleJ.x, particleJ.y) <
-                  ops.infectionRadius
-                ) {
-                  particleI.contactList = {
-                    ...particleI.contactList,
-                    [particleJ.id]: particleJ,
-                  };
-                } else if (particleI.contactList[particleJ.id]) {
-                  if (particleI.contactList[particleJ.id].status === STATUS.S) {
-                    if (Math.random() < ops.infectionRate) {
-                      particleJ.status = STATUS.I;
-                      infected.value++;
-                      susceptibles.value--;
-                    }
-                    particleI.effectiveContacts++;
-                  }
-                  delete particleI.contactList[particleJ.id];
-                  particleI.basicContacts++;
-                }
-              }
-            }
-          }
-        }
-
-        if (infected.value) {
-          const effectiveContacts =
-            particles
-              .filter((p) => p.status === STATUS.I)
-              .reduce(
-                (sum: number, p: Particle) =>
-                  sum + p.effectiveContacts * (ops.recoveryRate / p.duration),
-                0
-              ) / infected.value;
-
-          const basicContacts =
-            particles
-              .filter((p) => p.status === STATUS.I)
-              .reduce(
-                (sum: number, p: Particle) =>
-                  sum + p.basicContacts * (ops.recoveryRate / p.duration),
-                0
-              ) / infected.value;
-
-          effectiveReproduction.value = parseFloat(
-            (effectiveContacts * ops.infectionRate).toFixed(2)
-          );
-          basicReproduction.value = parseFloat(
-            (basicContacts * ops.infectionRate).toFixed(2)
-          );
-        } else {
-          effectiveReproduction.value = null;
-          basicReproduction.value = null;
-        }
-      }
-
-      p5.setup = () => {
-        p5.createCanvas(options.value.width, options.value.height);
-        particles = [];
-
-        for (
-          let i = 0;
-          i < options.value.amountParticles - options.value.i0;
-          i++
-        ) {
-          particles.push(new Particle(i, STATUS.S, options.value));
-        }
-
-        for (let i = 0; i < options.value.i0; i++) {
-          particles.push(
-            new Particle(
-              options.value.amountParticles + i,
-              STATUS.I,
-              options.value
-            )
-          );
-        }
-      };
-
-      p5.draw = () => {
-        if (play.value) {
-          p5.background(33, 33, 33);
-          loop();
-
-          if (counter.value % 24 === 0) {
-            updateChart();
-          }
-
-          counter.value++;
-
-          if (!infected.value) {
-            updateChart();
-            play.value = false;
-          }
-        }
-      };
-    };
-
-    const restartSimulation = () => {
-      play.value = true;
-      counter.value = 0;
-
-      chartSeries.value = [
-        {
-          name: "Susceptibles",
-          data: [],
-        },
-        {
-          name: "Infected",
-          data: [],
-        },
-        {
-          name: "Recovered",
-          data: [],
-        },
-        {
-          name: "Diseased",
-          data: [],
-        },
-      ];
-
-      brnSeries.value = [
-        {
-          name: "Basisreproduktionszahl",
-          data: [],
-        },
-        {
-          name: "Nettoreproduktionszahl",
-          data: [],
-        },
-      ];
-
-      susceptibles.value = options.value.amountParticles - options.value.i0;
-      infected.value = options.value.i0;
-      recovered.value = 0;
-      diseased.value = 0;
-
-      p5sketch.value.setup();
-    };
-
-    onMounted(() => {
-      p5sketch.value = new P5(sketch, "simulation-window");
-    });
-
     return {
-      susceptibles,
-      infected,
-      recovered,
-      diseased,
       options,
-      play,
-      restartSimulation,
-      chartSeries,
-      basicReproduction,
-      brnSeries,
+      ...useSimulation(options.value)
     };
   },
 });

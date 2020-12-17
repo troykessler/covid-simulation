@@ -50,11 +50,15 @@ export class Particle {
       if (ops.communities) {
         this.calcSectors();
 
-        this.xBarrier(166.66, ops.border);
-        this.xBarrier(333.33, ops.border);
-        
-        this.yBarrier(166.66, ops.border);
-        this.yBarrier(333.33, ops.border);
+        const communityWidth = ops.width / ops.communities;
+
+        for (let x = 1; x < ops.communities; x++) {
+          this.xBarrier(x * communityWidth, ops.border);
+        }
+
+        for (let y = 1; y < ops.communities; y++) {
+          this.yBarrier(y * communityWidth, ops.border);
+        }
       }
   
       if (this.y >= ops.height || this.y <= 0) {
