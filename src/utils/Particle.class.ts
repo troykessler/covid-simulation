@@ -22,7 +22,7 @@ export class Particle {
   travelCounter: number = 40;
   postTravelSpeed: number = 0;
 
-  sector: number = 0;
+  sectorId: number = 0;
 
   constructor(id: number, status: STATUS, options: IOptions) {
     this.id = id;
@@ -48,9 +48,12 @@ export class Particle {
       }
 
       if (ops.communities) {
-        this.calcSectors();
-
         const communityWidth = ops.width / ops.communities;
+
+        const xSector = Math.floor(this.x / communityWidth);
+        const ySector = Math.floor(this.y / communityWidth);
+
+        this.sectorId = xSector + (ops.communities! * ySector);
 
         for (let x = 1; x < ops.communities; x++) {
           this.xBarrier(x * communityWidth, ops.border);
@@ -141,34 +144,6 @@ export class Particle {
     if ((this.y <= y && this.y + this.d.y >= y) || (this.y >= y && this.y + this.d.y <= y)) {
       if (!this.travelling && Math.random() < (border || 1)) {
         this.d.y *= -1;
-      }
-    }
-  }
-
-  calcSectors() {
-    if (this.x <= 166.66) {
-      if (this.y <= 166.66) {
-        this.sector = 0;
-      } else if (this.y <= 333.33) {
-        this.sector = 1;
-      } else {
-        this.sector = 2;
-      }
-    } else if (this.x <= 333.33) {
-      if (this.y <= 166.66) {
-        this.sector = 3;
-      } else if (this.y <= 333.33) {
-        this.sector = 4;
-      } else {
-        this.sector = 5;
-      }
-    } else {
-      if (this.y <= 166.66) {
-        this.sector = 6;
-      } else if (this.y <= 333.33) {
-        this.sector = 7;
-      } else {
-        this.sector = 8;
       }
     }
   }

@@ -124,6 +124,15 @@ export function useSimulation(options: IOptions) {
         });
       }
 
+
+      if (ops.communities && counter.value % 24 === 0) {
+        for (let i = 0; i < ops.travelsPerDay!; i++) {
+          const x = Math.random() * ops.width;
+          const y = Math.random() * ops.height;
+          particles[Math.floor(Math.random() * ops.amountParticles)].travelTo(x, y, ops.speed);
+        }
+      }
+
       for (let i = 0; i < particles.length; i++) {
         particles[i].move(ops, particles);
 
@@ -171,7 +180,7 @@ export function useSimulation(options: IOptions) {
                 };
               } else if (particleI.contactList[particleJ.id]) {
                 if (particleI.contactList[particleJ.id].status === STATUS.S) {
-                  if (Math.random() < ops.infectionRate) {
+                  if (particleI.sectorId === particleJ.sectorId && Math.random() < ops.infectionRate) {
                     particleJ.status = STATUS.I;
                     infected.value++;
                     susceptibles.value--;

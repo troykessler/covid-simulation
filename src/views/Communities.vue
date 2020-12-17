@@ -98,7 +98,7 @@ export default defineComponent({
 
       communities: 3,
       border: 0.98,
-      travelsPerDay: 1
+      travelsPerDay: 2
     });
 
     return {
