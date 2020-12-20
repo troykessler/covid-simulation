@@ -1,6 +1,6 @@
 import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router'
 import Base from '../views/Base.vue'
-import CentralLocation from '../views/CentralLocation.vue'
+import Hotspots from '../views/Hotspots.vue'
 import Communities from '../views/Communities.vue'
 
 const routes: Array<RouteRecordRaw> = [
@@ -10,9 +10,9 @@ const routes: Array<RouteRecordRaw> = [
     component: Base
   },
   {
-    path: '/central',
-    name: 'CentralLocation',
-    component: CentralLocation
+    path: '/hotspots',
+    name: 'Hotspots',
+    component: Hotspots
   },
   {
     path: '/communities',

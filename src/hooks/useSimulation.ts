@@ -82,7 +82,7 @@ export function useSimulation(options: IOptions) {
   };
 
   const sketch = (p5: any) => {
-    
+
     function loop() {
       const ops: IOptions = options;
 
