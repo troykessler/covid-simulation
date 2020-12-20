@@ -3,7 +3,7 @@ import { IOptions, STATUS, STATUS_COLOR } from "@/utils/types";
 import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import P5 from "p5";
 
-export function useSimulation(options: IOptions) {
+export function useSimulation(name: string, options: IOptions) {
   const play = ref<boolean>(true);
   const stop = ref<boolean>(false);
   const p5sketch = ref<any>(null);
@@ -349,7 +349,7 @@ export function useSimulation(options: IOptions) {
   };
 
   onMounted(() => {
-    p5sketch.value = new P5(sketch, "simulation-window");
+    p5sketch.value = new P5(sketch, name);
   });
 
   onBeforeUnmount(() => {

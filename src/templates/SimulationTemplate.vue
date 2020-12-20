@@ -7,7 +7,7 @@
             S = {{ susceptibles }}, I = {{ infected }}, R = {{ recovered }}, D =
             {{ diseased }} | R0 = {{ basicReproduction || 0 }}
           </div>
-          <div id="simulation-window" class="mt-4 mx-auto block"></div>
+          <div :id="`simulation-window-${name}`" class="simulation-window mt-4 mx-auto block"></div>
           <div class="flex justify-center items-center mt-5">
             <button
               class="rounded-full h-10 w-10 border-2 border-white focus:outline-none mx-2 hover:bg-white hover:bg-opacity-10"
@@ -95,14 +95,14 @@ export default defineComponent({
     return {
       model,
       switchModel,
-      ...useSimulation(props.options as IOptions)
+      ...useSimulation(`simulation-window-${props.name}`, props.options as IOptions)
     };
   },
 });
 </script>
 
 <style>
-#simulation-window {
+.simulation-window {
   width: 500px;
   height: 500px;
   outline: 2px solid white;
