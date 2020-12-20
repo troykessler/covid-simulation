@@ -1,12 +1,14 @@
 import { Particle } from "@/utils/Particle.class";
 import { IOptions, STATUS, STATUS_COLOR } from "@/utils/types";
-import { onBeforeUnmount, onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref, watch } from "vue";
 import P5 from "p5";
 
 export function useSimulation(options: IOptions) {
   const play = ref<boolean>(true);
   const stop = ref<boolean>(false);
   const p5sketch = ref<any>(null);
+
+  let particles: Particle[] = [];
   
   const susceptibles = ref<number>(options.amountParticles - options.i0);
   const infected = ref<number>(options.i0);
@@ -16,6 +18,7 @@ export function useSimulation(options: IOptions) {
   const counter = ref<number>(0);
   const basicReproduction = ref<number | null>(0);
   const effectiveReproduction = ref<number | null>(0);
+
   const reproductionSeries = ref<any[]>([
     {
       name: "Basisreproduktionszahl",
@@ -46,6 +49,10 @@ export function useSimulation(options: IOptions) {
     },
   ]);
 
+  watch(() => options.socialDistancingParticipation, () => {
+    particles.forEach((particle: Particle) => particle.obeysSocialDistancing = Math.random() < options.socialDistancingParticipation)
+  });
+
   const updateChart = () => {
     dataSeries.value[0].data = [
       ...dataSeries.value[0].data,
@@ -75,8 +82,7 @@ export function useSimulation(options: IOptions) {
   };
 
   const sketch = (p5: any) => {
-    let particles: Particle[] = [];
-
+    
     function loop() {
       const ops: IOptions = options;
 
@@ -348,7 +354,7 @@ export function useSimulation(options: IOptions) {
 
   onBeforeUnmount(() => {
     stop.value = true;
-  })
+  });
 
   return {
     susceptibles,

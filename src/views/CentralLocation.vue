@@ -92,6 +92,7 @@ export default defineComponent({
       deathRate: 0.05,
       recoveryRate: 19 * 24,
       socialDistancing: 0,
+      socialDistancingParticipation: 1,
 
       centralLocations: [
         {

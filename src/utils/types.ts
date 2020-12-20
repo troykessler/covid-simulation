@@ -28,9 +28,12 @@ export interface IOptions {
   i0: number;
   infectionRadius: number;
   infectionRate: number;
+
   deathRate: number;
   recoveryRate: number;
+
   socialDistancing: number;
+  socialDistancingParticipation: number;
 
   centralLocations?: CentralLocation[];
   centralParticleAmount?: number;

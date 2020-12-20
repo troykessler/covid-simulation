@@ -72,6 +72,17 @@
         />
       </div>
       <div>
+        <div>Social Distancing Participation</div>
+        <vue-slider
+          class="mt-1"
+          :drag-on-click="true"
+          :min="0"
+          :max="1"
+          :interval="0.01"
+          v-model="modelValue.socialDistancingParticipation"
+        />
+      </div>
+      <div>
         <div>Sterberate</div>
         <vue-slider
           class="mt-1"

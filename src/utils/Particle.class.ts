@@ -13,6 +13,8 @@ export class Particle {
   status: STATUS = STATUS.S;
   duration: number = 1;
 
+  obeysSocialDistancing: boolean;
+
   contactList: any = {};
 
   effectiveContacts: number = 0;
@@ -38,6 +40,8 @@ export class Particle {
       x: Math.cos(this.directions) * this.speed,
       y: Math.sin(this.directions) * this.speed
     }
+
+    this.obeysSocialDistancing = Math.random() < options.socialDistancingParticipation
   }
 
   move(ops: IOptions, particles: Particle[]) {
@@ -76,15 +80,17 @@ export class Particle {
       this.x += this.d.x;
       this.y += this.d.y;
   
-      if (this.status !== STATUS.D && !this.travelling && this.d.x !== 0 && this.d.y !== 0) {
-        for (let i = 0; i < particles.length; i++) {
-          const ang = Math.atan2(this.y - particles[i].y, this.x - particles[i].x);
-          const dist = Math.sqrt(Math.pow(particles[i].x - this.x, 2) + Math.pow(particles[i].y - this.y, 2));
-          const force = this.mapRange(ops.socialDistancing, 0, 1, 0, 0.05) * dist;
-  
-          if (dist < 25) {
-            this.x += force * Math.cos(ang);
-            this.y += force * Math.sin(ang);
+      if (this.obeysSocialDistancing) {
+        if (this.status !== STATUS.D && !this.travelling && this.d.x !== 0 && this.d.y !== 0) {
+          for (let i = 0; i < particles.length; i++) {
+            const ang = Math.atan2(this.y - particles[i].y, this.x - particles[i].x);
+            const dist = Math.sqrt(Math.pow(particles[i].x - this.x, 2) + Math.pow(particles[i].y - this.y, 2));
+            const force = this.mapRange(ops.socialDistancing, 0, 1, 0, 0.05) * dist;
+    
+            if (dist < 25) {
+              this.x += force * Math.cos(ang);
+              this.y += force * Math.sin(ang);
+            }
           }
         }
       }
