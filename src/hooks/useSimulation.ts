@@ -1,10 +1,11 @@
 import { Particle } from "@/utils/Particle.class";
 import { IOptions, STATUS, STATUS_COLOR } from "@/utils/types";
-import { onMounted, ref } from "vue";
+import { onBeforeUnmount, onMounted, ref } from "vue";
 import P5 from "p5";
 
 export function useSimulation(options: IOptions) {
   const play = ref<boolean>(true);
+  const stop = ref<boolean>(false);
   const p5sketch = ref<any>(null);
   
   const susceptibles = ref<number>(options.amountParticles - options.i0);
@@ -129,7 +130,11 @@ export function useSimulation(options: IOptions) {
         for (let i = 0; i < ops.travelsPerDay!; i++) {
           const x = Math.random() * ops.width;
           const y = Math.random() * ops.height;
-          particles[Math.floor(Math.random() * ops.amountParticles)].travelTo(x, y, ops.speed);
+          const particle = particles[Math.floor(Math.random() * ops.amountParticles)];
+
+          if (particle.status !== STATUS.D) {
+            particle.travelTo(x, y, ops.speed);
+          }
         }
       }
 
@@ -250,7 +255,9 @@ export function useSimulation(options: IOptions) {
     };
 
     p5.draw = () => {
-      if (play.value) {
+      if (stop.value) {
+        p5.remove();
+      } else if (play.value) {
         p5.background(33, 33, 33);
 
         if (options.centralLocations) {
@@ -338,6 +345,10 @@ export function useSimulation(options: IOptions) {
   onMounted(() => {
     p5sketch.value = new P5(sketch, "simulation-window");
   });
+
+  onBeforeUnmount(() => {
+    stop.value = true;
+  })
 
   return {
     susceptibles,
