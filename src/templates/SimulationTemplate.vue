@@ -29,7 +29,7 @@
           <div class="text-white">Demographie Population</div>
           <population-chart class="chart" :chartSeries="dataSeries" />
           <div class="text-white q-mt-lg">Reproduktionszahlen</div>
-          <basic-reproduction-number-chart
+          <reproduction-chart
             class="chart"
             :chartSeries="reproductionSeries"
           />
@@ -66,7 +66,7 @@
 <script lang="ts">
 import { defineComponent, ref } from "vue";
 import PopulationChart from "@/components/PopulationChart.vue";
-import BasicReproductionNumberChart from "@/components/BasicReproductionNumberChart.vue";
+import ReproductionChart from "@/components/ReproductionChart.vue";
 import { IOptions } from "@/utils/types";
 import { useSimulation } from '@/hooks/useSimulation';
 import router from '@/router';
@@ -74,7 +74,7 @@ import router from '@/router';
 export default defineComponent({
   components: {
     PopulationChart,
-    BasicReproductionNumberChart,
+    ReproductionChart,
   },
   props: {
     name: {

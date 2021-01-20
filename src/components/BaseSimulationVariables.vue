@@ -93,6 +93,22 @@
           v-model="modelValue.deathRate"
         />
       </div>
+      <div>
+        <div>Quarantäne</div>
+        <input class="mt-2" type="checkbox" v-model="modelValue.quarantine" />
+      </div>
+      <div>
+        <div>Tests pro Tag</div>
+        <vue-slider
+          class="mt-1"
+          :drag-on-click="true"
+          :min="0"
+          :max="50"
+          :interval="1"
+          :disabled="!modelValue.quarantine"
+          v-model="modelValue.testsPerDay"
+        />
+      </div>
     </div>
   </div>
 </template>

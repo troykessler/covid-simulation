@@ -30,6 +30,8 @@ export default defineComponent({
       infectionRate: 0.25,
       deathRate: 0.05,
       recoveryRate: 19 * 24,
+      quarantine: false,
+      testsPerDay: 10,
       socialDistancing: 0,
       socialDistancingParticipation: 1
     });

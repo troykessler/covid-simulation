@@ -81,7 +81,7 @@ export class Particle {
       this.y += this.d.y;
   
       if (this.obeysSocialDistancing) {
-        if (this.status !== STATUS.D && !this.travelling && this.d.x !== 0 && this.d.y !== 0) {
+        if (this.status !== STATUS.D && this.status !== STATUS.Q && !this.travelling && this.d.x !== 0 && this.d.y !== 0) {
           for (let i = 0; i < particles.length; i++) {
             const ang = Math.atan2(this.y - particles[i].y, this.x - particles[i].x);
             const dist = Math.sqrt(Math.pow(particles[i].x - this.x, 2) + Math.pow(particles[i].y - this.y, 2));
@@ -106,7 +106,7 @@ export class Particle {
       }
     }
 
-    if (this.status === STATUS.I) {
+    if (this.status === STATUS.I || this.status === STATUS.Q) {
       this.duration++;
     }
 

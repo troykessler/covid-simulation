@@ -10,7 +10,7 @@
           :min="1"
           :max="50"
           :interval="1"
-          v-model="modelValue.centralParticleAmount"
+          v-model="modelValue.centralCapacity"
         />
       </div>
       <div>
@@ -21,7 +21,7 @@
           :min="0"
           :max="1"
           :interval="0.01"
-          v-model="modelValue.centralExchangeRate"
+          v-model="modelValue.centralExchange"
         />
       </div>
       <div>
@@ -32,7 +32,7 @@
           :min="30"
           :max="250"
           :interval="5"
-          v-model="modelValue.centralLocationRadius"
+          v-model="modelValue.centralRadius"
         />
       </div>
     </div>

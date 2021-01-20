@@ -89,12 +89,12 @@ export function useSimulation(name: string, options: IOptions) {
       if (ops.centralLocations) {
         ops.centralLocations.forEach((location) => {
           if (
-            location.particles.length < options.centralParticleAmount!
+            location.particles.length < options.centralCapacity!
           ) {
             const particlesInRadius = particles.filter(
               (particle) =>
                 particle.distance(location.center.x, location.center.y) <
-                options.centralLocationRadius!
+                options.centralRadius!
             );
 
             if (particlesInRadius.length) {
@@ -108,9 +108,9 @@ export function useSimulation(name: string, options: IOptions) {
                 0
               );
             }
-          } else if (Math.random() < options.centralExchangeRate!) {
+          } else if (Math.random() < options.centralExchange!) {
             if (
-              !location.particles[options.centralParticleAmount! - 1]
+              !location.particles[options.centralCapacity! - 1]
                 .travelling
             ) {
               const particle = location.particles.pop();
@@ -118,12 +118,12 @@ export function useSimulation(name: string, options: IOptions) {
               const x =
                 location.center.x +
                 Math.cos(ang) *
-                  options.centralLocationRadius! *
+                  options.centralRadius! *
                   Math.random();
               const y =
                 location.center.y +
                 Math.sin(ang) *
-                  options.centralLocationRadius! *
+                  options.centralRadius! *
                   Math.random();
               particle?.travelTo(x, y, options.speed);
             }
@@ -138,17 +138,37 @@ export function useSimulation(name: string, options: IOptions) {
           const y = Math.random() * ops.height;
           const particle = particles[Math.floor(Math.random() * ops.amountParticles)];
 
-          if (particle.status !== STATUS.D) {
+          if (particle.status !== STATUS.D && particle.status !== STATUS.Q) {
             particle.travelTo(x, y, ops.speed);
           }
         }
+      }
+
+      if (ops.quarantine && counter.value % 24 === 0) {
+        let testSubjects: Particle[] = []
+
+        while (testSubjects.length < ops.testsPerDay) {
+          const particle = particles[Math.floor(Math.random() * ops.amountParticles)];
+
+          if (!testSubjects.includes(particle)) {
+            testSubjects.push(particle)
+          }
+        }
+
+        testSubjects.forEach((particle: Particle) => {
+          if (particle.status === STATUS.I) {
+            particle.status = STATUS.Q;
+            particle.d.x = 0;
+            particle.d.y = 0;
+          }
+        })
       }
 
       for (let i = 0; i < particles.length; i++) {
         particles[i].move(ops, particles);
 
         if (
-          particles[i].status === STATUS.I &&
+          (particles[i].status === STATUS.I || particles[i].status === STATUS.Q) &&
           particles[i].duration > ops.recoveryRate
         ) {
           if (Math.random() < ops.deathRate) {
@@ -158,6 +178,12 @@ export function useSimulation(name: string, options: IOptions) {
             infected.value--;
             diseased.value++;
           } else {
+            if (particles[i].status === STATUS.Q) {
+              const directions = (2 * Math.PI * Math.random()) - Math.PI;
+              particles[i].d.x = Math.cos(directions) * ops.speed;
+              particles[i].d.y = Math.sin(directions) * ops.speed;
+            }
+
             particles[i].status = STATUS.R;
             infected.value--;
             recovered.value++;

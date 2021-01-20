@@ -33,6 +33,8 @@ export default defineComponent({
       infectionRate: 0.25,
       deathRate: 0.05,
       recoveryRate: 19 * 24,
+      quarantine: false,
+      testsPerDay: 10,
       socialDistancing: 0,
       socialDistancingParticipation: 1,
 
@@ -73,9 +75,9 @@ export default defineComponent({
           particles: [],
         },
       ],
-      centralParticleAmount: 10,
-      centralExchangeRate: 0.1,
-      centralLocationRadius: 100,
+      centralCapacity: 10,
+      centralExchange: 0.1,
+      centralRadius: 100,
     });
 
     return {
