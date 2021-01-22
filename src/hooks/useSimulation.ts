@@ -8,6 +8,9 @@ export function useSimulation(name: string, options: IOptions) {
   const stop = ref<boolean>(false);
   const p5sketch = ref<any>(null);
 
+  const simulationRuns: number = 5;
+  const simulationCounter = ref<number>(0);
+
   let particles: Particle[] = [];
   
   const susceptibles = ref<number>(options.amountParticles - options.i0);
@@ -30,6 +33,29 @@ export function useSimulation(name: string, options: IOptions) {
     },
   ]);
 
+  const experimentReproductionSeries = ref<any[]>([
+    {
+      name: 'Basisreproduktionszahl',
+      type: 'scatter',
+      data: []
+    },
+    {
+      name: 'Nettoreproduktionszahl',
+      type: 'scatter',
+      data: []
+    },
+    {
+      name: 'Ø Basisreproduktionszahl',
+      type: 'line',
+      data: []
+    },
+    {
+      name: 'Ø Nettoreproduktionszahl',
+      type: 'line',
+      data: []
+    },
+  ])
+
   const dataSeries = ref<any[]>([
     {
       name: "Susceptibles",
@@ -48,6 +74,49 @@ export function useSimulation(name: string, options: IOptions) {
       data: [],
     },
   ]);
+
+  const experimentDataSeries = ref<any[]>([
+    {
+      name: "Susceptibles",
+      type: "scatter",
+      data: [],
+    },
+    {
+      name: "Infected",
+      type: "scatter",
+      data: [],
+    },
+    {
+      name: "Recovered",
+      type: "scatter",
+      data: [],
+    },
+    {
+      name: "Diseased",
+      type: "scatter",
+      data: [],
+    },
+    {
+      name: "Ø Susceptible",
+      type: "line",
+      data: []
+    },
+    {
+      name: "Ø Infected",
+      type: "line",
+      data: []
+    },
+    {
+      name: "Ø Recovered",
+      type: "line",
+      data: []
+    },
+    {
+      name: "Ø Diseased",
+      type: "line",
+      data: []
+    },
+  ])
 
   watch(() => options.socialDistancingParticipation, () => {
     particles.forEach((particle: Particle) => particle.obeysSocialDistancing = Math.random() < options.socialDistancingParticipation)
@@ -327,6 +396,62 @@ export function useSimulation(name: string, options: IOptions) {
         if (!infected.value) {
           updateChart();
           play.value = false;
+          if (simulationCounter.value < simulationRuns) {
+            simulationCounter.value++;
+
+            for (let i = 0; i < 4; i++) {
+              experimentDataSeries.value[i].data = [
+                ...experimentDataSeries.value[i].data,
+                ...dataSeries.value[i].data.map((d: any, index: number) => [index, d])
+              ]
+
+              let averageCounter = 0
+              let aggregatedAverage = []
+              let averageData = []
+
+              do {
+                aggregatedAverage = experimentDataSeries.value[i].data.filter((d: number[]) => d[0] === averageCounter)
+
+                if (aggregatedAverage.length) {
+                  averageData.push([averageCounter, Number((aggregatedAverage.reduce((sum: number, d: number[]) => sum + d[1], 0) / aggregatedAverage.length).toFixed(1))])
+                }
+                averageCounter++;
+              } while (aggregatedAverage.length);
+
+              experimentDataSeries.value[i + 4].data = [...averageData];
+            }
+
+            for (let i = 0; i < 2; i++) {
+              experimentReproductionSeries.value[i].data = [
+                ...experimentReproductionSeries.value[i].data,
+                ...reproductionSeries.value[i].data.map((d: any, index: number) => [index, d])
+              ]
+
+              let averageCounter = 0
+              let aggregatedAverage = []
+              let averageData = []
+
+              do {
+                aggregatedAverage = experimentReproductionSeries.value[i].data.filter((d: number[]) => d[0] === averageCounter)
+
+                if (aggregatedAverage.length) {
+                  averageData.push([averageCounter, Number((aggregatedAverage.reduce((sum: number, d: number[]) => sum + d[1], 0) / aggregatedAverage.length).toFixed(1))])
+                }
+                averageCounter++;
+              } while (aggregatedAverage.length);
+
+              experimentReproductionSeries.value[i + 2].data = [...averageData];
+            }
+
+            if (simulationCounter.value === simulationRuns) {
+              console.log(JSON.stringify(experimentDataSeries.value[5].data))
+              console.log(JSON.stringify(experimentDataSeries.value[7].data))
+              console.log(JSON.stringify(experimentReproductionSeries.value[2].data))
+              console.log(JSON.stringify(experimentReproductionSeries.value[3].data))
+            } else {
+              restartSimulation();
+            }
+          }
         }
       }
     };
@@ -391,6 +516,8 @@ export function useSimulation(name: string, options: IOptions) {
     restartSimulation,
     dataSeries,
     basicReproduction,
-    reproductionSeries
+    reproductionSeries,
+    experimentDataSeries,
+    experimentReproductionSeries
   }
 }

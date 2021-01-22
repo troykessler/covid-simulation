@@ -89,7 +89,7 @@
           :drag-on-click="true"
           :min="0"
           :max="1"
-          :interval="0.01"
+          :interval="0.001"
           v-model="modelValue.deathRate"
         />
       </div>
