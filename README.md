@@ -11,7 +11,7 @@ kann.
 
 ## Wo befindet sich es?
 
-Das Projekt kann unter folgendem Link gefunden werden: `https://gifted-einstein-2065af.netlify.app/#/`.
+Das Projekt kann unter folgendem Link gefunden werden: [https://gifted-einstein-2065af.netlify.app/#/](https://gifted-einstein-2065af.netlify.app/#/).
 
 Das Projekt wurde mithilfe von [Netlify](https://www.netlify.com/) deployed.
 
