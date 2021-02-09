@@ -29,18 +29,20 @@ export default defineComponent({
       speed: 0.5,
       size: 4,
       i0: 3,
-      infectionRadius: 7,
-      infectionRate: 0.25,
-      deathRate: 0.05,
+      infectionRadius: 10,
+      infectionRate: 0.13,
+      deathRate: 0.036,
       recoveryRate: 19 * 24,
       quarantine: false,
       testsPerDay: 10,
+      maskInfectionRate: 0.1,
+      maskParticipation: 0,
       socialDistancing: 0,
       socialDistancingParticipation: 1,
 
-      communities: 3,
-      border: 0.98,
-      travelsPerDay: 2
+      communities: 1,
+      border: 0.95,
+      travelsPerDay: 15
     });
 
     return {

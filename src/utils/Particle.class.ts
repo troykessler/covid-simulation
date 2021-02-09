@@ -13,6 +13,7 @@ export class Particle {
   status: STATUS = STATUS.S;
   duration: number = 1;
 
+  wearsMask: boolean;
   obeysSocialDistancing: boolean;
 
   contactList: any = {};
@@ -41,7 +42,8 @@ export class Particle {
       y: Math.sin(this.directions) * this.speed
     }
 
-    this.obeysSocialDistancing = Math.random() < options.socialDistancingParticipation
+    this.obeysSocialDistancing = Math.random() < options.socialDistancingParticipation;
+    this.wearsMask = Math.random() < options.maskParticipation;
   }
 
   move(ops: IOptions, particles: Particle[]) {

@@ -37,6 +37,9 @@ export interface IOptions {
   quarantine: boolean;
   testsPerDay: number;
 
+  maskInfectionRate: number;
+  maskParticipation: number;
+
   socialDistancing: number;
   socialDistancingParticipation: number;
 
