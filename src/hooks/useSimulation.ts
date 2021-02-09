@@ -8,6 +8,7 @@ export function useSimulation(name: string, options: IOptions) {
   const stop = ref<boolean>(false);
   const p5sketch = ref<any>(null);
 
+  const simulationExperimentMode: boolean = false;
   const simulationRuns: number = 5;
   const simulationCounter = ref<number>(0);
 
@@ -120,6 +121,10 @@ export function useSimulation(name: string, options: IOptions) {
 
   watch(() => options.socialDistancingParticipation, () => {
     particles.forEach((particle: Particle) => particle.obeysSocialDistancing = Math.random() < options.socialDistancingParticipation)
+  });
+
+  watch(() => options.maskParticipation, () => {
+    particles.forEach((particle: Particle) => particle.wearsMask = Math.random() < options.maskParticipation)
   });
 
   const updateChart = () => {
@@ -286,10 +291,12 @@ export function useSimulation(name: string, options: IOptions) {
                 };
               } else if (particleI.contactList[particleJ.id]) {
                 if (particleI.contactList[particleJ.id].status === STATUS.S) {
-                  if (particleI.sectorId === particleJ.sectorId && Math.random() < ops.infectionRate) {
-                    particleJ.status = STATUS.I;
-                    infected.value++;
-                    susceptibles.value--;
+                  if (particleI.sectorId === particleJ.sectorId) {
+                    if (Math.random() < (particleI.wearsMask ? ops.maskInfectionRate : ops.infectionRate)) {
+                      particleJ.status = STATUS.I;
+                      infected.value++;
+                      susceptibles.value--;
+                    }
                   }
                   particleI.effectiveContacts++;
                 }
@@ -300,6 +307,9 @@ export function useSimulation(name: string, options: IOptions) {
           }
         }
       }
+
+      const realInfectionRate = 
+        ((options.maskParticipation * options.maskInfectionRate) + ((1 - options.maskParticipation) * options.infectionRate));
 
       if (infected.value) {
         const effectiveContacts =
@@ -321,10 +331,10 @@ export function useSimulation(name: string, options: IOptions) {
             ) / infected.value;
 
         effectiveReproduction.value = parseFloat(
-          (effectiveContacts * ops.infectionRate).toFixed(2)
+          (effectiveContacts * realInfectionRate).toFixed(2)
         );
         basicReproduction.value = parseFloat(
-          (basicContacts * ops.infectionRate).toFixed(2)
+          (basicContacts * realInfectionRate).toFixed(2)
         );
       } else {
         effectiveReproduction.value = null;
@@ -393,6 +403,10 @@ export function useSimulation(name: string, options: IOptions) {
 
         counter.value++;
 
+        if (counter.value === 21 * 24) {
+          options.travelsPerDay = 0;
+        }
+
         if (!infected.value) {
           updateChart();
           play.value = false;
@@ -443,12 +457,12 @@ export function useSimulation(name: string, options: IOptions) {
               experimentReproductionSeries.value[i + 2].data = [...averageData];
             }
 
-            if (simulationCounter.value === simulationRuns) {
-              console.log(JSON.stringify(experimentDataSeries.value[5].data))
-              console.log(JSON.stringify(experimentDataSeries.value[7].data))
-              console.log(JSON.stringify(experimentReproductionSeries.value[2].data))
-              console.log(JSON.stringify(experimentReproductionSeries.value[3].data))
-            } else {
+            console.log(JSON.stringify(experimentDataSeries.value[5].data))
+            console.log(JSON.stringify(experimentDataSeries.value[7].data))
+            console.log(JSON.stringify(experimentReproductionSeries.value[3].data))
+
+            if (simulationCounter.value !== simulationRuns) {
+              options.travelsPerDay = 15;
               restartSimulation();
             }
           }
@@ -460,6 +474,12 @@ export function useSimulation(name: string, options: IOptions) {
   const restartSimulation = () => {
     play.value = true;
     counter.value = 0;
+
+    if (options.centralLocations) {
+      options.centralLocations!.forEach((location) => {
+        location.particles = []
+      })
+    }
 
     dataSeries.value = [
       {
@@ -518,6 +538,7 @@ export function useSimulation(name: string, options: IOptions) {
     basicReproduction,
     reproductionSeries,
     experimentDataSeries,
-    experimentReproductionSeries
+    experimentReproductionSeries,
+    simulationExperimentMode
   }
 }

@@ -12,7 +12,6 @@ import { defineComponent, ref } from "vue";
 import SimulationTemplate from "@/templates/SimulationTemplate.vue";
 import BaseSimulationVariables from "@/components/BaseSimulationVariables.vue";
 import HotspotSimulationVariables from "@/components/HotspotSimulationVariables.vue";
-import router from '@/router';
 import { IOptions } from "@/utils/types";
 
 export default defineComponent({
@@ -29,12 +28,14 @@ export default defineComponent({
       speed: 0.5,
       size: 4,
       i0: 3,
-      infectionRadius: 3,
-      infectionRate: 0.22,
+      infectionRadius: 10,
+      infectionRate: 0.11,
       deathRate: 0.036,
       recoveryRate: 19 * 24,
       quarantine: false,
       testsPerDay: 10,
+      maskInfectionRate: 0.1,
+      maskParticipation: 0,
       socialDistancing: 0,
       socialDistancingParticipation: 1,
 

@@ -60,7 +60,7 @@
     <div class="mb-32">
       <slot name="variables" />
     </div>
-    <div>
+    <div v-if="simulationExperimentMode">
       <population-experiment-chart :chartSeries="experimentDataSeries"></population-experiment-chart>
       <reproduction-experiment-chart :chartSeries="experimentReproductionSeries"></reproduction-experiment-chart>
     </div>
@@ -73,6 +73,7 @@ import PopulationChart from "@/components/PopulationChart.vue";
 import ReproductionChart from "@/components/ReproductionChart.vue";
 import PopulationExperimentChart from "@/components/PopulationExperimentChart.vue";
 import ReproductionExperimentChart from "@/components/ReproductionExperimentChart.vue";
+import MasksChart from "@/charts/MasksChart.vue";
 import { IOptions } from "@/utils/types";
 import { useSimulation } from '@/hooks/useSimulation';
 import router from '@/router';
@@ -83,6 +84,7 @@ export default defineComponent({
     ReproductionChart,
     PopulationExperimentChart,
     ReproductionExperimentChart,
+    MasksChart
   },
   props: {
     name: {

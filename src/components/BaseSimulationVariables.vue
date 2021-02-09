@@ -61,6 +61,28 @@
         />
       </div>
       <div>
+        <div>Infektionswahrscheinlichkeitwahrscheinlichkeit mit Maske</div>
+        <vue-slider
+          class="mt-1"
+          :drag-on-click="true"
+          :min="0"
+          :max="1"
+          :interval="0.01"
+          v-model="modelValue.maskInfectionRate"
+        />
+      </div>
+      <div>
+        <div>Anteil Maskenträger</div>
+        <vue-slider
+          class="mt-1"
+          :drag-on-click="true"
+          :min="0"
+          :max="1"
+          :interval="0.01"
+          v-model="modelValue.maskParticipation"
+        />
+      </div>
+      <div>
         <div>Social Distancing</div>
         <vue-slider
           class="mt-1"
