@@ -1,5 +1,27 @@
 <template>
   <div>
+    <div class="text-white  my-12 m-auto" style="max-width: 1128px;">
+      <div class="flex justify-between items-center">
+        <span class="font-bold text-4xl">Covid-19 Simulation</span>
+        <button
+          class="flex items-center justify-center rounded w-32 border-2 border-white focus:outline-none mx-2 hover:bg-white hover:bg-opacity-10"
+          @click="openGitHub"
+        >
+          <i class="mdi mdi-github text-2xl"></i>
+          <span class="text-base font-bold ml-2">GitHub</span>
+        </button>
+      </div>
+      <div class="mt-6 text-sm flex items-center">
+        <i class="mdi mdi-information-outline text-xl mr-2"></i>
+        Es handelt sich hier um ein
+        visuelles Simulationsprogramm, mit dem man die Ausbreitungsdynamik von Covid-19 und anderen Krankheiten spielerisch
+        erforschen kann.
+      </div>
+      <div class="mt-2 text-sm flex items-center">
+        <i class="mdi mdi-source-pull text-xl mr-2"></i>
+        Da es sich um ein OpenSource Projekt handelt sind Pull-Requests und andere Verbesserungsvorschläge erwünscht!
+      </div>
+    </div>
     <div class="grid grid-cols-2 gap-x-32 my-6">
       <div class="text-white text-right">
         <div class="inline-block">
@@ -37,23 +59,23 @@
       </div>
     </div>
     <div class="text-white my-12 m-auto" style="max-width: 1128px;">
-      <div class="font-bold">Modell</div>
+      <div class="font-bold">Zusätzliche Faktoren</div>
       <div class="flex items-center mt-4">
         <input id="radio-base" value="/" v-model="model" type="radio" class="h-4 w-4" @input="switchModel">
         <label for="radio-base" class="ml-3 block">
-          Basismodell
+          Keine
         </label>
       </div>
       <div class="flex items-center">
         <input id="radio-hotspot" value="hotspots" v-model="model" type="radio" class="h-4 w-4" @input="switchModel">
         <label for="radio-hotspot" class="ml-3 block">
-          Hotspotmodell
+          Zentrale Einrichtungen
         </label>
       </div>
       <div class="flex items-center">
         <input id="radio-community" value="communities" v-model="model" type="radio" class="h-4 w-4" @input="switchModel">
         <label for="radio-community" class="ml-3 block">
-          Communitymodell
+          Grenzen & Reisen
         </label>
       </div>
     </div>
@@ -102,9 +124,14 @@ export default defineComponent({
       router.replace(event.target.value)
     }
 
+    const openGitHub = () => {
+      window.open('https://github.com/troykessler/covid-simulation', '_blank')
+    }
+
     return {
       model,
       switchModel,
+      openGitHub,
       ...useSimulation(`simulation-window-${props.name}`, props.options as IOptions)
     };
   },

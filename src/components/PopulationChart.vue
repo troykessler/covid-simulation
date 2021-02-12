@@ -23,6 +23,7 @@ export default defineComponent({
         height: 250,
         type: 'line',
         group: 'covid',
+        foreColor: '#ffffff',
         zoom: {
           enabled: false
         },
@@ -54,19 +55,19 @@ export default defineComponent({
       },
       series: [
         {
-          name: 'Susceptibles',
+          name: 'Anfällig',
           data: []
         },
         {
-          name: 'Infected',
+          name: 'Infiziert',
           data: []
         },
         {
-          name: 'Recovered',
+          name: 'Erholt',
           data: []
         },
         {
-          name: 'Diseased',
+          name: 'Verstorben',
           data: []
         }
       ]

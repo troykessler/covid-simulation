@@ -40,9 +40,9 @@ export default defineComponent({
       socialDistancing: 0,
       socialDistancingParticipation: 1,
 
-      communities: 1,
+      communities: 4,
       border: 0.95,
-      travelsPerDay: 15
+      travelsPerDay: 2
     });
 
     return {

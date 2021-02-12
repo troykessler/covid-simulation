@@ -2,7 +2,7 @@
 
 ## Worum geht es?
 
-Dieses Projekt wurde für eine Bachelorarbeit mit dem Titel `"Entwurf und Implementierung einerEpidemien-Simulation zur Evaluation und Bewertungvon verschiedenen Maßnahmen gegen COVID-19"` erstellt. Es handelt sich hier um ein
+Dieses Projekt wurde für eine Bachelorarbeit mit dem Titel `"Entwurf und Implementierung einer Epidemien-Simulation zur Evaluation und Bewertung von verschiedenen Maßnahmen gegen COVID-19"` erstellt. Es handelt sich hier um ein
 visuelles Simulationsprogramm, mit dem man die Ausbreitungsdynamik von Covid-19 und anderen Krankheiten spielerisch
 erforschen kann. Zusätzlich ist es möglich Maßnahmen wie Maskenpflicht, physische Distanzierung, Schließung
 von zentralen Einrichtungen, Reisebeschränkungen, Grenzschließungen und viele weitere zu erforschen.

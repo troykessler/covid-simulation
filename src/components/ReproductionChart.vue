@@ -23,6 +23,7 @@ export default defineComponent({
         height: 250,
         type: 'line',
         group: 'covid',
+        foreColor: '#ffffff',
         zoom: {
           enabled: false
         },

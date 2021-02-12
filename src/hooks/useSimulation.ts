@@ -9,7 +9,7 @@ export function useSimulation(name: string, options: IOptions) {
   const p5sketch = ref<any>(null);
 
   const simulationExperimentMode: boolean = false;
-  const simulationRuns: number = 5;
+  const simulationRuns: number = 1;
   const simulationCounter = ref<number>(0);
 
   let particles: Particle[] = [];
@@ -59,61 +59,61 @@ export function useSimulation(name: string, options: IOptions) {
 
   const dataSeries = ref<any[]>([
     {
-      name: "Susceptibles",
+      name: "Anfällig",
       data: [],
     },
     {
-      name: "Infected",
+      name: "Infiziert",
       data: [],
     },
     {
-      name: "Recovered",
+      name: "Erholt",
       data: [],
     },
     {
-      name: "Diseased",
+      name: "Verstorben",
       data: [],
     },
   ]);
 
   const experimentDataSeries = ref<any[]>([
     {
-      name: "Susceptibles",
+      name: "Anfällig",
       type: "scatter",
       data: [],
     },
     {
-      name: "Infected",
+      name: "Infiziert",
       type: "scatter",
       data: [],
     },
     {
-      name: "Recovered",
+      name: "Erholt",
       type: "scatter",
       data: [],
     },
     {
-      name: "Diseased",
+      name: "Verstorben",
       type: "scatter",
       data: [],
     },
     {
-      name: "Ø Susceptible",
+      name: "Ø Anfällig",
       type: "line",
       data: []
     },
     {
-      name: "Ø Infected",
+      name: "Ø Infiziert",
       type: "line",
       data: []
     },
     {
-      name: "Ø Recovered",
+      name: "Ø Erholt",
       type: "line",
       data: []
     },
     {
-      name: "Ø Diseased",
+      name: "Ø Verstorben",
       type: "line",
       data: []
     },
@@ -410,60 +410,63 @@ export function useSimulation(name: string, options: IOptions) {
         if (!infected.value) {
           updateChart();
           play.value = false;
-          if (simulationCounter.value < simulationRuns) {
-            simulationCounter.value++;
 
-            for (let i = 0; i < 4; i++) {
-              experimentDataSeries.value[i].data = [
-                ...experimentDataSeries.value[i].data,
-                ...dataSeries.value[i].data.map((d: any, index: number) => [index, d])
-              ]
-
-              let averageCounter = 0
-              let aggregatedAverage = []
-              let averageData = []
-
-              do {
-                aggregatedAverage = experimentDataSeries.value[i].data.filter((d: number[]) => d[0] === averageCounter)
-
-                if (aggregatedAverage.length) {
-                  averageData.push([averageCounter, Number((aggregatedAverage.reduce((sum: number, d: number[]) => sum + d[1], 0) / aggregatedAverage.length).toFixed(1))])
-                }
-                averageCounter++;
-              } while (aggregatedAverage.length);
-
-              experimentDataSeries.value[i + 4].data = [...averageData];
-            }
-
-            for (let i = 0; i < 2; i++) {
-              experimentReproductionSeries.value[i].data = [
-                ...experimentReproductionSeries.value[i].data,
-                ...reproductionSeries.value[i].data.map((d: any, index: number) => [index, d])
-              ]
-
-              let averageCounter = 0
-              let aggregatedAverage = []
-              let averageData = []
-
-              do {
-                aggregatedAverage = experimentReproductionSeries.value[i].data.filter((d: number[]) => d[0] === averageCounter)
-
-                if (aggregatedAverage.length) {
-                  averageData.push([averageCounter, Number((aggregatedAverage.reduce((sum: number, d: number[]) => sum + d[1], 0) / aggregatedAverage.length).toFixed(1))])
-                }
-                averageCounter++;
-              } while (aggregatedAverage.length);
-
-              experimentReproductionSeries.value[i + 2].data = [...averageData];
-            }
-
-            console.log(JSON.stringify(experimentDataSeries.value[5].data))
-            console.log(JSON.stringify(experimentDataSeries.value[7].data))
-            console.log(JSON.stringify(experimentReproductionSeries.value[3].data))
-
-            if (simulationCounter.value !== simulationRuns) {
-              options.travelsPerDay = 15;
-              restartSimulation();
+          if (simulationExperimentMode) {
+            if (simulationCounter.value < simulationRuns) {
+              simulationCounter.value++;
+  
+              for (let i = 0; i < 4; i++) {
+                experimentDataSeries.value[i].data = [
+                  ...experimentDataSeries.value[i].data,
+                  ...dataSeries.value[i].data.map((d: any, index: number) => [index, d])
+                ]
+  
+                let averageCounter = 0
+                let aggregatedAverage = []
+                let averageData = []
+  
+                do {
+                  aggregatedAverage = experimentDataSeries.value[i].data.filter((d: number[]) => d[0] === averageCounter)
+  
+                  if (aggregatedAverage.length) {
+                    averageData.push([averageCounter, Number((aggregatedAverage.reduce((sum: number, d: number[]) => sum + d[1], 0) / aggregatedAverage.length).toFixed(1))])
+                  }
+                  averageCounter++;
+                } while (aggregatedAverage.length);
+  
+                experimentDataSeries.value[i + 4].data = [...averageData];
+              }
+  
+              for (let i = 0; i < 2; i++) {
+                experimentReproductionSeries.value[i].data = [
+                  ...experimentReproductionSeries.value[i].data,
+                  ...reproductionSeries.value[i].data.map((d: any, index: number) => [index, d])
+                ]
+  
+                let averageCounter = 0
+                let aggregatedAverage = []
+                let averageData = []
+  
+                do {
+                  aggregatedAverage = experimentReproductionSeries.value[i].data.filter((d: number[]) => d[0] === averageCounter)
+  
+                  if (aggregatedAverage.length) {
+                    averageData.push([averageCounter, Number((aggregatedAverage.reduce((sum: number, d: number[]) => sum + d[1], 0) / aggregatedAverage.length).toFixed(1))])
+                  }
+                  averageCounter++;
+                } while (aggregatedAverage.length);
+  
+                experimentReproductionSeries.value[i + 2].data = [...averageData];
+              }
+  
+              console.log(JSON.stringify(experimentDataSeries.value[5].data))
+              console.log(JSON.stringify(experimentDataSeries.value[7].data))
+              console.log(JSON.stringify(experimentReproductionSeries.value[3].data))
+  
+              if (simulationCounter.value !== simulationRuns) {
+                options.travelsPerDay = 15;
+                restartSimulation();
+              }
             }
           }
         }
@@ -483,19 +486,19 @@ export function useSimulation(name: string, options: IOptions) {
 
     dataSeries.value = [
       {
-        name: "Susceptibles",
+        name: "Anfällig",
         data: [],
       },
       {
-        name: "Infected",
+        name: "Infiziert",
         data: [],
       },
       {
-        name: "Recovered",
+        name: "Erholt",
         data: [],
       },
       {
-        name: "Diseased",
+        name: "Verstorben",
         data: [],
       },
     ];
