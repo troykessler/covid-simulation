@@ -36,8 +36,8 @@ export default defineComponent({
       testsPerDay: 10,
       maskInfectionRate: 0.1,
       maskParticipation: 0,
-      socialDistancing: 0,
-      socialDistancingParticipation: 1,
+      socialDistancing: 0.8,
+      socialDistancingParticipation: 0,
 
       centralLocations: [
         {

@@ -1,9 +1,9 @@
 <template>
   <div class="text-white my-12 m-auto" style="max-width: 1128px;">
-    <div class="font-bold">Community Variablen</div>
+    <div class="font-bold">Variablen Grenzen & Reisen</div>
     <div class="mt-8 grid grid-cols-2 gap-x-24 gap-y-6">
       <div>
-        <div>Communities</div>
+        <div>Anzahl an Kommunen</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"

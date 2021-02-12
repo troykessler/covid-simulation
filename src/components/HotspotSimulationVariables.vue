@@ -1,9 +1,9 @@
 <template>
   <div class="text-white my-12 m-auto" style="max-width: 1128px;">
-    <div class="font-bold">Hotspotvariablen</div>
+    <div class="font-bold">Variablen zentrale Einrichtungen</div>
     <div class="mt-8 grid grid-cols-2 gap-x-24 gap-y-6">
       <div>
-        <div>Hotspotgröße</div>
+        <div>Kapazität von Einrichtungen</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
@@ -14,7 +14,7 @@
         />
       </div>
       <div>
-        <div>Hotspotaustauschrate</div>
+        <div>Besucherrate von Einrichtungen</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
@@ -25,7 +25,7 @@
         />
       </div>
       <div>
-        <div>Hotspoteinflussradius</div>
+        <div>Einflussradius von Einrichtungen</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"

@@ -24,8 +24,19 @@
         />
       </div>
     </div>
-    <div class="mt-12 font-bold">Dynamische Variablen</div>
+    <div class="mt-12 font-bold">Variablen Krankheit</div>
     <div class="mt-8 grid grid-cols-2 gap-x-24 gap-y-6">
+      <div>
+        <div>Infektionswahrscheinlichkeit</div>
+        <vue-slider
+          class="mt-1"
+          :drag-on-click="true"
+          :min="0"
+          :max="1"
+          :interval="0.01"
+          v-model="modelValue.infectionRate"
+        />
+      </div>
       <div>
         <div>Infektionsdauer</div>
         <vue-slider
@@ -50,27 +61,19 @@
         />
       </div>
       <div>
-        <div>Infektionswahrscheinlichkeit</div>
+        <div>Sterberate</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
           :min="0"
           :max="1"
-          :interval="0.01"
-          v-model="modelValue.infectionRate"
+          :interval="0.001"
+          v-model="modelValue.deathRate"
         />
       </div>
-      <div>
-        <div>Infektionswahrscheinlichkeitwahrscheinlichkeit mit Maske</div>
-        <vue-slider
-          class="mt-1"
-          :drag-on-click="true"
-          :min="0"
-          :max="1"
-          :interval="0.01"
-          v-model="modelValue.maskInfectionRate"
-        />
-      </div>
+    </div>
+    <div class="mt-12 font-bold">Variablen Maskenpflicht</div>
+    <div class="mt-8 grid grid-cols-2 gap-x-24 gap-y-6">
       <div>
         <div>Anteil Maskenträger</div>
         <vue-slider
@@ -83,18 +86,21 @@
         />
       </div>
       <div>
-        <div>Social Distancing</div>
+        <div>Infektionswahrscheinlichkeit mit Maske</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
           :min="0"
           :max="1"
           :interval="0.01"
-          v-model="modelValue.socialDistancing"
+          v-model="modelValue.maskInfectionRate"
         />
       </div>
+    </div>
+    <div class="mt-12 font-bold">Variablen physische Distanzierung</div>
+    <div class="mt-8 grid grid-cols-2 gap-x-24 gap-y-6">
       <div>
-        <div>Social Distancing Participation</div>
+        <div>Anteilnahme physische Distanzierung</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
@@ -105,16 +111,19 @@
         />
       </div>
       <div>
-        <div>Sterberate</div>
+        <div>Physische Distanzierungsfaktor</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
           :min="0"
           :max="1"
-          :interval="0.001"
-          v-model="modelValue.deathRate"
+          :interval="0.01"
+          v-model="modelValue.socialDistancing"
         />
       </div>
+    </div>
+    <div class="mt-12 font-bold">Variablen Quarantäne</div>
+    <div class="mt-8 grid grid-cols-2 gap-x-24 gap-y-6">
       <div>
         <div>Quarantäne</div>
         <input class="mt-2" type="checkbox" v-model="modelValue.quarantine" />
