@@ -13,7 +13,7 @@
         />
       </div>
       <div>
-        <div>Infizierte</div>
+        <div>Initial Infiziert</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
