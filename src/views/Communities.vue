@@ -30,7 +30,7 @@ export default defineComponent({
       size: 4,
       i0: 3,
       infectionRadius: 10,
-      infectionRate: 0.13,
+      infectionRate: 0.22,
       deathRate: 0.036,
       recoveryRate: 19 * 24,
       quarantine: false,
@@ -41,7 +41,7 @@ export default defineComponent({
       socialDistancingParticipation: 0,
 
       communities: 4,
-      border: 0.95,
+      border: 0.97,
       travelsPerDay: 2
     });
 

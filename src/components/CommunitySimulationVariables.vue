@@ -10,7 +10,7 @@
           :min="1"
           :max="5"
           :interval="1"
-          :tooltip-formatter="communityFormatter"
+          :tooltip-formatter="() => `${Math.pow(modelValue.communities, 2)}`"
           v-model="modelValue.communities"
         />
       </div>
@@ -22,6 +22,7 @@
           :min="0"
           :max="1"
           :interval="0.01"
+          :tooltip-formatter="() => `${(modelValue.border * 100).toFixed(0)}%`"
           v-model="modelValue.border"
         />
       </div>
@@ -52,13 +53,6 @@ export default defineComponent({
     modelValue: {
       type: Object,
       default: {}
-    }
-  },
-  setup(props) {
-    const communityFormatter = () => `${Math.pow(props.modelValue.communities, 2)}`;
-
-    return {
-      communityFormatter
     }
   }
 })

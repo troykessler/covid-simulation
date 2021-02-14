@@ -10,11 +10,12 @@
           :min="1"
           :max="50"
           :interval="1"
+          :tooltip-formatter="() => `${modelValue.centralCapacity} Individuen`"
           v-model="modelValue.centralCapacity"
         />
       </div>
       <div>
-        <div>Besucherrate von Einrichtungen</div>
+        <div>Besucherrate von Einrichtungen (0 bis 1)</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
@@ -32,6 +33,7 @@
           :min="30"
           :max="250"
           :interval="5"
+          :tooltip-formatter="() => `${(modelValue.centralRadius / 10).toFixed(1)}m`"
           v-model="modelValue.centralRadius"
         />
       </div>

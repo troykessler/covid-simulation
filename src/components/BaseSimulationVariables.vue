@@ -27,13 +27,14 @@
     <div class="mt-12 font-bold">Variablen Krankheit</div>
     <div class="mt-8 grid grid-cols-2 gap-x-24 gap-y-6">
       <div>
-        <div>Infektionswahrscheinlichkeit</div>
+        <div>Infektionswahrscheinlichkeit pro Kontakt</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
           :min="0"
           :max="1"
-          :interval="0.01"
+          :interval="0.001"
+          :tooltip-formatter="() => `${(modelValue.infectionRate * 100).toFixed(1)}%`"
           v-model="modelValue.infectionRate"
         />
       </div>
@@ -45,7 +46,7 @@
           :min="24"
           :max="24 * 50"
           :interval="1"
-          :tooltip-formatter="recoveryRateFormatter"
+          :tooltip-formatter="() => `${Math.floor(modelValue.recoveryRate / 24)} Tage`"
           v-model="modelValue.recoveryRate"
         />
       </div>
@@ -57,6 +58,7 @@
           :min="1"
           :max="50"
           :interval="1"
+          :tooltip-formatter="() => `${(modelValue.infectionRadius / 10).toFixed(1)}m`"
           v-model="modelValue.infectionRadius"
         />
       </div>
@@ -68,6 +70,7 @@
           :min="0"
           :max="1"
           :interval="0.001"
+          :tooltip-formatter="() => `${(modelValue.deathRate * 100).toFixed(1)}%`"
           v-model="modelValue.deathRate"
         />
       </div>
@@ -75,24 +78,26 @@
     <div class="mt-12 font-bold">Variablen Maskenpflicht</div>
     <div class="mt-8 grid grid-cols-2 gap-x-24 gap-y-6">
       <div>
-        <div>Anteil Maskenträger</div>
+        <div>Anteil Maskenträger von Population</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
           :min="0"
           :max="1"
           :interval="0.01"
+          :tooltip-formatter="() => `${(modelValue.maskParticipation * 100).toFixed(0)}%`"
           v-model="modelValue.maskParticipation"
         />
       </div>
       <div>
-        <div>Infektionswahrscheinlichkeit mit Maske</div>
+        <div>Infektionswahrscheinlichkeit pro Kontakt mit Maske</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
           :min="0"
           :max="1"
-          :interval="0.01"
+          :interval="0.001"
+          :tooltip-formatter="() => `${(modelValue.maskInfectionRate * 100).toFixed(1)}%`"
           v-model="modelValue.maskInfectionRate"
         />
       </div>
@@ -100,18 +105,19 @@
     <div class="mt-12 font-bold">Variablen physische Distanzierung</div>
     <div class="mt-8 grid grid-cols-2 gap-x-24 gap-y-6">
       <div>
-        <div>Anteilnahme physische Distanzierung</div>
+        <div>Anteilnahme physische Distanzierung von Population</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
           :min="0"
           :max="1"
           :interval="0.01"
+          :tooltip-formatter="() => `${(modelValue.socialDistancingParticipation * 100).toFixed(0)}%`"
           v-model="modelValue.socialDistancingParticipation"
         />
       </div>
       <div>
-        <div>Physische Distanzierungsfaktor</div>
+        <div>Physischer Distanzierungsfaktor (0 bis 1)</div>
         <vue-slider
           class="mt-1"
           :drag-on-click="true"
@@ -156,13 +162,6 @@ export default defineComponent({
     modelValue: {
       type: Object,
       default: {}
-    }
-  },
-  setup(props) {
-    const recoveryRateFormatter = () => `${Math.floor(props.modelValue.recoveryRate / 24)}`;
-
-    return {
-      recoveryRateFormatter
     }
   }
 })
