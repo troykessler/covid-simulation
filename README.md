@@ -1,4 +1,4 @@
-# Covid-9 Simulation
+# Covid-19 Simulation
 
 ## Worum geht es?
 
